@@ -70,8 +70,8 @@ class SendCommand {
                         logger.info(`Send - ${from_user.username}:${from_user.id} -> ${to_user.username}:${to_user.id} - ${amount}`);
 
                         // change balances
-                        await userModel.decreaseBalance(from_user, amount);
-                        await userModel.increaseBalance(to_user, amount);
+                        const sender_balance = await userModel.decreaseBalance(from_user, amount);
+                        const recipient_balance = await userModel.increaseBalance(to_user, amount);
 
                         const datetime = moment().format(v.DATE_FORMAT);
 
@@ -89,7 +89,7 @@ class SendCommand {
                         // send message to recipient if there is any telegram id
                         if (to_user.telegramId && command !== 'tip') {
                             self.app.telegram.sendMessage(to_user.telegramId,
-                                `<code>${amount} XRP</code> is received from @${from_user.username}</code>`,
+                                `<code>${amount}</code> XRP is received from @${from_user.username}\nYour new balance is <code>${recipient_balance} XRP</code>`,
                                 {parse_mode: 'HTML'}
                             )
                         }
