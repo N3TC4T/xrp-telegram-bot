@@ -1,0 +1,38 @@
+{
+    "name": "Ripple-Telegram-Bot",
+    "version": "1.0.0",
+    "description": "Send , Deposit , Withdraw ,Tip With $XRP in Telegram",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "telegram",
+        "bot",
+        "xrp",
+        "ripple"
+    ],
+    "author": "netcat.av@gmail.com",
+    "license": "MIT",
+    "dependencies": {
+        "chalk": "^2.3.2",
+        "dotenv": "^5.0.1",
+        "lodash": "^4.17.4",
+        "moment": "^2.18.1",
+        "mysql2": "^1.5.3",
+        "redis": "^2.8.0",
+        "ripple-address-codec": "^2.0.1",
+        "ripple-lib": "^0.19.1",
+        "sequelize": "^4.37.5",
+        "sequelize-cli": "^4.0.0",
+        "telegraf": "^3.8.0",
+        "telegraf-command-parts": "^1.0.3",
+        "telegraf-session-redis": "^5.0.0",
+        "uuid": "^3.1.0",
+        "winston": "^2.4.1",
+        "winston-daily-rotate-file": "^3.0.1"
+    },
+    "resolutions": {
+        "jsonschema": "1.2.2"
+    }
+}
