@@ -53,7 +53,7 @@ class DepositListener {
     }
 
     onConnect() {
-        console.log("---", chalk.green("Connected to Ripple Server [s.altnet.rippletest.net]"));
+        console.log("---", chalk.green("Connected to Ripple Server [s1.ripple.com]"));
 
         // subscribe our wallet address
         this.api.connection.request({
