@@ -150,7 +150,7 @@ class WithdrawCommand {
                         )
                     }
 
-                    if (!/^[+-]?\d+(\.\d+)?$/.test(amount) && parseFloat(amount) <= 0) {
+                    if (!/^[+-]?\d+(\.\d+)?$/.test(amount) || parseFloat(amount) <= 0) {
                         return replyWithHTML(`<b>Invalid Amount</b>`)
                     } else {//valid amount
                         if (parseFloat(user.balance) < parseFloat(amount)) {//Insufficient fund

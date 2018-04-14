@@ -1,4 +1,7 @@
 'use strict';
+
+const _ = require("lodash");
+
 module.exports = function(sequelize, DataTypes) {
     const Group = sequelize.define('Group', {
         groupId: DataTypes.BIGINT,
@@ -10,14 +13,18 @@ module.exports = function(sequelize, DataTypes) {
     };
 
     Group.prototype.updateGroup = function(ctx, next) {
-        let from, chat = null;
+        let chat = null;
         if (ctx.updateType === "callback_query") {
-            from = ctx.update.callback_query.from;
             chat = ctx.update.callback_query.message.chat
         } else {
-            from = ctx.update.message.from;
-            chat = ctx.update.message.chat
+            if(_.has(ctx, ['update', 'message', 'chat'])){
+                chat = ctx.update.message.chat
+            }
         }
+        if(!chat){
+            return next()
+        }
+
         if(!(chat.type === 'group' || chat.type === 'supergroup')) {
             return next()
         }
