@@ -64,6 +64,10 @@ class SendCommand {
                             }
                         }
 
+                        if(from_user.username.toLowerCase() === username.toLowerCase()){
+                            return replyWithHTML(`<b>You can not send/tip to yourself!</b>`)
+                        }
+
 
                         const to_user = await userModel.getUserByUsername(username);
 
@@ -89,7 +93,7 @@ class SendCommand {
                         // send message to recipient if there is any telegram id
                         if (to_user.telegramId && command !== 'tip') {
                             self.app.telegram.sendMessage(to_user.telegramId,
-                                `<code>${amount}</code> XRP is received from @${from_user.username}\nYour new balance is <code>${recipient_balance} XRP</code>`,
+                                `<b>${amount}</b> XRP is received from @${from_user.username}\nYour new balance is <b>${recipient_balance} XRP</b>`,
                                 {parse_mode: 'HTML'}
                             )
                         }

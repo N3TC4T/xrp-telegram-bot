@@ -1,6 +1,7 @@
 'use strict';
 
 //utils
+const _ = require("lodash");
 const logger = require('../lib/loggin');
 
 
@@ -35,8 +36,15 @@ module.exports = function(sequelize, DataTypes) {
         if (ctx.updateType === "callback_query") {
             from = ctx.update.callback_query.from;
         } else {
-            from = ctx.update.message.from;
+            if(_.has(ctx, ['update', 'message', 'from'])){
+                from = ctx.update.message.from;
+            }
         }
+
+        if(!from){
+            return next()
+        }
+
         User.findOne({where: {telegramId: from.id}})
             .then((u) => {
                 if (u) {
@@ -92,7 +100,7 @@ module.exports = function(sequelize, DataTypes) {
     };
 
     User.prototype.getUserByUsername = function (username) {
-        return User.findOrCreate({where: {username: username}, defaults: {username: username}})
+        return User.findOrCreate({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', username)) }, defaults: {username: username}})
             .spread((user) => {
                 return user.get({
                     plain: true

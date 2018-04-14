@@ -56,7 +56,7 @@ module.exports = function (sequelize, DataTypes) {
             text,
             datetime,
             raw: JSON.stringify(ctx.update),
-        });
+        }).then(function() {}).catch(function() {});
 
         return next()
     };
