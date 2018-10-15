@@ -6,7 +6,9 @@ const helpMsg = `Command reference:
 /tip - Tip a user in XRP (just in groups)
 /deposit - Show deposit address
 /balance - Show current balance
-/withdraw - move your current balance to your personal wallet`;
+/withdraw - Move your current balance to your personal wallet
+/subscribe - Subscribe to XRP Community Blog
+/unsubscribe - Unsubscribe to XRP Community Blog`;
 
 class HelpCommand {
     constructor(app, db) {
