@@ -4,6 +4,7 @@ const Telegraf = require('telegraf');
 const commandParts = require('telegraf-command-parts');
 const RedisSession = require('./lib/session');
 const DepositListener = require('./listener/deposit');
+const FeedListener = require('./listener/feed');
 
 const chalk = require('chalk');
 
@@ -36,6 +37,8 @@ const commandList = [
     require('./commands/deposit'),
     require('./commands/balance'),
     require('./commands/withdraw'),
+    require('./commands/subscribe'),
+    require('./commands/unsubscribe'),
 ];
 
 /** Using REDIS Instead of JS Memory */
@@ -64,6 +67,7 @@ commandList.forEach((d) => {
 });
 
 new DepositListener(bot,db);
+new FeedListener(bot,db);
 
 bot.startPolling();
 
