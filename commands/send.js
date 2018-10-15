@@ -55,10 +55,17 @@ class SendCommand {
                             )
                         }
 
+                        if(!username || username.length < 5){
+                            return replyWithHTML(`<b>Invalid Username!</b>`)
+                        }
 
-                        if (!/^[+-]?\d+(\.\d+)?$/.test(amount) || parseFloat(amount) <= 0) {
+
+                        if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
                             return replyWithHTML(`<b>Invalid Amount</b>`)
                         } else {//valid amount
+                            if(parseFloat(amount) < 0.000001){
+                                return replyWithHTML(`<b>The minimum amount to send/tip is 0.000001 XRP!</b>`)
+                            }
                             if (parseFloat(from_user.balance) < parseFloat(amount)) {//Insufficient fund
                                 return replyWithHTML(`<b>Insufficient Balance</b>`)
                             }

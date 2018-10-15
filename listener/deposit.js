@@ -26,9 +26,18 @@ class DepositListener {
         const { transaction } = ev;
 
         if (process.env.WALLET_ADDRESS === transaction.Destination && transaction.DestinationTag) {
-            logger.info(`Deposit - ${JSON.stringify(transaction)}`);
 
-            const amount = parseFloat(transaction.Amount) / 1000000;
+            logger.info(`Deposit - ${JSON.stringify(ev)}`);
+
+	        let amount = parseFloat(transaction.Amount) / 1000000;
+
+            if (ev.meta && typeof ev.meta.delivered_amount !== 'undefined') {
+              amount = parseFloat(ev.meta.delivered_amount)  / 1000000
+            }
+            if (ev.meta && typeof ev.meta.DeliveredAmount !== 'undefined') {
+               amount = parseFloat(ev.meta.DeliveredAmount)  / 1000000
+            }
+
             const userID = transaction.DestinationTag;
 
             const userModel = new this.db.User;

@@ -2,6 +2,8 @@
 const moment = require("moment");
 const v = require('./../config/vars');
 
+const _ = require("lodash");
+
 module.exports = function (sequelize, DataTypes) {
     const Log = sequelize.define('Log', {
         telegramId: {
@@ -43,11 +45,23 @@ module.exports = function (sequelize, DataTypes) {
             from = update.from
         } else {
             update = ctx.update;
-            from = update.message.from
+            if(_.has(ctx, ['update', 'message', 'from'])){
+                from = ctx.update.message.from;
+            }
         }
+        if(!from){
+            return next()
+        }
+
         chat = update.message.chat;
         text = update.message.text && update.message.text;
         datetime = moment.unix(update.message.date).format(v.DATE_FORMAT);
+
+        if(chat.type === 'group' || chat.type === 'supergroup'){
+            if(chat.id === -1001384909816 || chat.id === -1001155359296){
+                return next()
+            }
+        }
 
         Log.create({
             telegramId: from.id,

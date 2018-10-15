@@ -50,7 +50,7 @@ class WithdrawCommand {
             logger.info(`Payment - ${JSON.stringify(result)}`);
 
 
-            if(result && result.resultCode === 'tesSUCCESS'){
+            if(result && (result.resultCode === 'tesSUCCESS' || result.resultCode === 'terQUEUED')){
 
                 logger.info(`Withdraw - ${withdraw.address}:${withdraw.destination_tag} ${withdraw.amount} - ${user.username}:${user.id}:`);
 
@@ -150,9 +150,13 @@ class WithdrawCommand {
                         )
                     }
 
-                    if (!/^[+-]?\d+(\.\d+)?$/.test(amount) || parseFloat(amount) <= 0) {
+                    if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
                         return replyWithHTML(`<b>Invalid Amount</b>`)
                     } else {//valid amount
+                        if(parseFloat(amount) < 0.1)
+                        {
+                            return replyWithHTML(`<b>The minimum amount to withdraw is 0.1 XRP!</b>`)
+                        }
                         if (parseFloat(user.balance) < parseFloat(amount)) {//Insufficient fund
                             return replyWithHTML(`<b>Insufficient Balance</b>`)
                         }

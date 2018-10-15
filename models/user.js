@@ -54,7 +54,7 @@ module.exports = function(sequelize, DataTypes) {
                     u.language = from.language_code;
                     u.save();
                 } else {
-                    User.findOne({where: {username: from.username}})
+                    User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
                         .then((u) => {
                             if (u) {
                                 u.first_name = from.first_name;
