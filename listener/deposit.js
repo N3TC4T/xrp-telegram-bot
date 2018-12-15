@@ -24,13 +24,12 @@ class DepositListener {
     async onTransaction(ev){
 
         const { transaction } = ev;
+	logger.info(JSON.stringify(ev));
 
         if (process.env.WALLET_ADDRESS === transaction.Destination && transaction.DestinationTag) {
+            logger.info(`Deposit - ${JSON.stringify(transaction)}`);
 
-            logger.info(`Deposit - ${JSON.stringify(ev)}`);
-
-	        let amount = parseFloat(transaction.Amount) / 1000000;
-
+	    let amount = parseFloat(transaction.Amount) / 1000000;
             if (ev.meta && typeof ev.meta.delivered_amount !== 'undefined') {
               amount = parseFloat(ev.meta.delivered_amount)  / 1000000
             }
@@ -62,7 +61,7 @@ class DepositListener {
     }
 
     onConnect() {
-        console.log("---", chalk.green("Connected to Ripple Server [s1.ripple.com]"));
+        console.log("---", chalk.green("Connected to Ripple Server [s3.ripple.com]"));
 
         // subscribe our wallet address
         this.api.connection.request({
@@ -84,7 +83,7 @@ class DepositListener {
             this.api.disconnect();
         }
 
-        this.api = new RippleAPI({ server: "wss://s1.ripple.com:443" });
+        this.api = new RippleAPI({ server: "wss://s3.ripple.com:443" });
 
         this.api.connect().then(() => {
             this.onConnect();

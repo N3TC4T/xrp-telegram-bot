@@ -34,7 +34,7 @@ class FeedListener {
                 try{
                     this.bot.telegram.sendMessage(s.chatId,
                         `New #XRPCommunity Blog Post From ${feed.author}\n\n${feed.link}\n`,
-                    );
+                    ).catch(() => console.log(`Broadcast Failed for chat id ${s.chatId}`));
                     await this.sleep(1000);
                 }catch (e) {
                     console.log(`Broadcast Feed Failed for chatId ${s.chatId}`)
