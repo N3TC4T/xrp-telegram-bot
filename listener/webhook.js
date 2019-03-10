@@ -35,16 +35,18 @@ class WebhookListener {
                 amount = parseFloat(ev.meta.DeliveredAmount)  / 1000000
             }
 
-            const wallet = await this.db.WalletNotify.findOne({where: {address: Destination } })
+            const wallets = await this.db.WalletNotify.findAll({where: {address: Destination, active: true } })
 
-            if(!wallet) return
-            
-            const user = await this.db.User.findOne({where: {id: wallet.for_user}});
+            if(!wallets) return
 
-            this.bot.telegram.sendMessage(user.telegramId,
-                `<pre>🔔 Wallet Notify</pre>\n\nFrom: <code> ${transaction.Account}</code>\nTo: <code> ${transaction.Destination}</code>\nAmount: <code>${amount}</code> XRP\n\nYou can disable this messages in notificatons settings.\n\nhttps://bithomp.com/explorer/${transaction.hash}`,
-                {parse_mode: 'HTML'}
-            )
+            wallets.forEach(async wallet => {
+                const user = await this.db.User.findOne({where: {id: wallet.for_user}});
+
+                this.bot.telegram.sendMessage(user.telegramId,
+                    `<pre>🔔 Wallet Notify</pre>\n\nFrom: <code> ${transaction.Account}</code>\nTo: <code> ${transaction.Destination}</code>\nAmount: <code>${amount}</code> XRP\n\nYou can disable this messages in notificatons settings.\n\nhttps://bithomp.com/explorer/${transaction.hash}`,
+                    {parse_mode: 'HTML'}
+                )
+            });
 
          }catch(e) { console.log(e)}
         

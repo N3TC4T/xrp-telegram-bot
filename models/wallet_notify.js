@@ -56,15 +56,14 @@ module.exports = function (sequelize, DataTypes) {
         WalletNotify.findOne({where: {id}})
             .then(async (notify) => {
                 if(notify){
-                    const status = await xrpl_webhook.unsubscribe(notify.subscription_id)
-                    if(status){
-                        notify.active = false;
-                        notify.subscription_id = 0;
-                        notify.save();
-                        return true
-                    }else{
-                        return false
+                    notify.active = false;
+                    await notify.save();
+
+                    const exist_count = await WalletNotify.count({ where: {address: notify.address, active: true} })
+                    if(exist_count === 0 ){
+                        await xrpl_webhook.unsubscribe(notify.subscription_id)
                     }
+                    return true
                 }else{
                     return false
                 }
