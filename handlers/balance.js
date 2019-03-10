@@ -11,7 +11,7 @@ class BalanceCommand {
     }
 
     setCommand() {
-        this.app.command('balance', async(ctx) => {
+        this.app.hears('⚖️ Balance', async(ctx) => {
             const {replyWithHTML} = ctx;
             // can not run this command in groups
             const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
@@ -22,7 +22,7 @@ class BalanceCommand {
 
             const userModel = new this.db.User ;
             const user = await userModel.getUser(ctx);
-            replyWithHTML(`<b>Balance: </b><code>${user.balance} XRP</code>`)
+            replyWithHTML(`Your current <b>balance</b>:\n\n<code>${user.balance} $XRP</code>\n\nYou can use deposit command to add more $XRP to your balance`)
         })
     }
 }

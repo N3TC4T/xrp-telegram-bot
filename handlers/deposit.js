@@ -10,7 +10,7 @@ class DepositCommand {
     }
 
     setCommand() {
-        this.app.command('deposit', async(ctx) => {
+        this.app.hears('⬇️ Deposit', async(ctx) => {
             const {replyWithPhoto, replyWithHTML} = ctx;
 
             // can not run this command in groups
@@ -24,9 +24,11 @@ class DepositCommand {
             const user = await userModel.getUser(ctx);
             const address = `${process.env.WALLET_ADDRESS}?dt=${user.telegramId}`;
             let qrCode = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${address}`;
+            replyWithHTML('Send XRP to the address & destination tag displayed below to add XRP to  your balance\n' +
+                '\n⚠️ Please do not forget to enter your Destination Tag when sending your XRP! ')
             replyWithPhoto(qrCode)
-                .then( () => replyWithHTML(`<b>Address: </b><code>${process.env.WALLET_ADDRESS}</code>`))
-                .then( () => replyWithHTML(`<b>Destination Tag: </b><code>${user.telegramId}</code>`))
+                .then( () => replyWithHTML(`<b>Address: </b>\n<code>${process.env.WALLET_ADDRESS}</code>`))
+                .then( () => replyWithHTML(`<b>Destination Tag: </b>\n<code>${user.telegramId}</code>`))
 
         })
     }
