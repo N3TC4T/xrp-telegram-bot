@@ -74,15 +74,15 @@ class WithdrawHandler {
         stepTwoHandler.on('message', ctx => {
             const message = ctx.update.message.text;
 
-            if (Math.round(message) != message) {
+            if(parseInt(message) == message && message <= Number.MAX_SAFE_INTEGER && message >= Number.MIN_SAFE_INTEGER){
+                //set withdraw tag
+                ctx.scene.session.state.destination_tag = message;
+
+                ctx.wizard.next();
+                return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+            }else{
                 return ctx.reply('⚠️ Please enter a correct destination tag.');
             }
-
-            //set withdraw tag
-            ctx.scene.session.state.destination_tag = message;
-
-            ctx.wizard.next();
-            return ctx.wizard.steps[ctx.wizard.cursor](ctx);
 
         } );
 
@@ -121,7 +121,7 @@ class WithdrawHandler {
 
                 const components = amount.split('.')
                 const fraction = components[1] || '0'
-                console.log(fraction)
+
                 if (fraction.length > 6) {
                     return replyWithHTML(`<b>Too many decimal places, should be less that 6</b>`)
                 }
