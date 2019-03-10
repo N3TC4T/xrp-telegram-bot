@@ -18,7 +18,6 @@ class TipHandler {
         this.app.command(['tip'], async(ctx) => {
             const {replyWithHTML } = ctx;
 
-            const { command } = ctx.state.command;
             const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
 
             if(chat_type === 'private'){
@@ -55,24 +54,24 @@ class TipHandler {
                     }
 
                     if(!username || username.length < 5){
-                        return replyWithHTML(`<b>Invalid Username!</b>`)
+                        return replyWithHTML(`Invalid Username, please enter a valid telegram username!`)
                     }
 
 
                     if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                        return replyWithHTML(`<b>Invalid Amount</b>`)
+                        return replyWithHTML(`Invalid Amount, please enter a valid tip amount!`)
                     } else {//valid amount
                         if(parseFloat(amount) < 0.000001){
-                            return replyWithHTML(`<b>The minimum amount to tip is 0.000001 XRP!</b>`)
+                            return replyWithHTML(`The minimum amount to tip is <b>0.000001</b> XRP!`)
                         }
                         if (parseFloat(from_user.balance) < parseFloat(amount)) {//Insufficient fund
-                            return replyWithHTML(`<b>Insufficient Balance, Please deposit some $XRP before tiping! </b>`)
+                            return replyWithHTML(`<b>Insufficient Balance</b>, Please deposit some $XRP before tiping!`)
                         }
                     }
 
                     if(from_user.username){
                         if(from_user.username.toLowerCase() === username.toLowerCase()){
-                            return replyWithHTML(`<b>You can not tip to yourself!</b>`)
+                            return replyWithHTML(`You can not tip to yourself :)`)
                         }     
                     }
 
@@ -98,8 +97,11 @@ class TipHandler {
                     });
 
 
+                    const marketModel = new self.db.Market;
+                    const toUSD = await marketModel.calculate(amount, 'USD')
+
                     return replyWithHTML(
-                        `@${to_user.username} - You have received a tip: <b>${amount} XRP</b> from @${from_user.username}`
+                        `@${to_user.username} - 🎉 Woohoo, You have received a tip: <b>${amount} XRP</b> (${toUSD} USD) from @${from_user.username}`
                     )
                 }
                 catch (err) {

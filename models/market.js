@@ -15,5 +15,16 @@ module.exports = function (sequelize, DataTypes) {
         }
     });
 
+    Market.prototype.calculate =  function (amount, pair) {
+        return Market.findOne({
+            where:{
+                pair
+            }
+        }).then((m) => {
+            const ticker = JSON.parse(m.ticker)
+            return Math.round((amount * ticker.price) * 100) / 100
+        });
+    };
+
     return Market
 };

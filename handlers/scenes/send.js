@@ -78,10 +78,10 @@ class SendHandler {
 
 
     stepTwo(){
-        const stepThreeHandler = new Composer();
+        const stepTwoHandler = new Composer();
 
-        stepThreeHandler.hears(CANCEL_TEXT, this.Cancel);
-        stepThreeHandler.on('message', async ctx => {
+        stepTwoHandler.hears(CANCEL_TEXT, this.Cancel);
+        stepTwoHandler.on('message', async ctx => {
             const { replyWithHTML } = ctx;
             let amount = ctx.update.message.text;
 
@@ -118,17 +118,17 @@ class SendHandler {
 
         } );
 
-        return stepThreeHandler
+        return stepTwoHandler
     }
 
 
     stepThree(){
-        const stepFourHandler = new Composer();
+        const stepThreeHandler = new Composer();
 
-        stepFourHandler.hears(CANCEL_TEXT, this.Cancel);
-        stepFourHandler.action('confirm-send-no', this.Cancel);
+        stepThreeHandler.hears(CANCEL_TEXT, this.Cancel);
+        stepThreeHandler.action('confirm-send-no', this.Cancel);
 
-        stepFourHandler.action('confirm-send-yes', async (ctx) => {
+        stepThreeHandler.action('confirm-send-yes', async (ctx) => {
             const {replyWithHTML} = ctx;
             const {state} = ctx.scene.session;
 
@@ -161,7 +161,7 @@ class SendHandler {
                 });
 
                 // send message to recipient if there is any telegram id
-                if (to_user.telegramId && command !== 'tip') {
+                if (to_user.telegramId) {
                     this.app.telegram.sendMessage(to_user.telegramId,
                         `<b>${state.amount}</b> XRP is received from @${from_user.username}\nYour new balance is <b>${recipient_balance} XRP</b>`,
                         {parse_mode: 'HTML'}
@@ -180,15 +180,15 @@ class SendHandler {
             }
             finally {
                 // unlock after everything is done
-                // ctx.session.lock = null ;
                 unlock();
-                ctx.deleteMessage()
+                ctx.deleteMessage().catch((e) => {})
                 ctx.scene.leave()
+                return replyWithHTML('ℹ️ Main Menu.', MAIN_MENU)
             }
         });
 
 
-        return stepFourHandler
+        return stepThreeHandler
     }
 
     async setWizard(){
@@ -211,7 +211,7 @@ class SendHandler {
             (ctx) => {
                 const {state} = ctx.scene.session;
                 ctx.replyWithHTML(
-                    `<b>CONFIRM</b>\n\nYou want to send <b>${state.amount} XRP</b> to <b>${state.username}</b> is this correct?`,
+                    `<b>CONFIRM</b>\n\nYou want to send <b>${state.amount} XRP</b> to <b>@${state.username}</b> is this correct?`,
                     Markup.inlineKeyboard([
                         Markup.callbackButton('Yes', 'confirm-send-yes'),
                         Markup.callbackButton('No', 'confirm-send-no')
@@ -219,14 +219,7 @@ class SendHandler {
                 );
                 return ctx.wizard.next()
             },
-            this.stepThree(),
-            (ctx) => {
-                const {state} = ctx.scene.session;
-                ctx.replyWithHTML(
-                    'done'
-                );
-            },
-
+            this.stepThree()
         ))
     }
 

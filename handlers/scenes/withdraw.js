@@ -191,7 +191,7 @@ class WithdrawHandler {
                         result: result,
                         datetime : moment().format(v.DATE_FORMAT)
                     });
-                    replyWithHTML(`<b>SUCCESSFULLY WITHDRAW .</b>\n\nThe withdraw amount should be in your account in seconds\n\nyou can check the transaction here: \hhttps://bithomp.com/explorer/${result.hash}`, MAIN_MENU)
+                    replyWithHTML(`<b>SUCCESSFULLY WITHDRAW .</b>\n\nThe withdraw amount should be in your account in seconds\n\nyou can check the transaction here: \nhttps://bithomp.com/explorer/${result.hash}`, MAIN_MENU)
                 }else{
                     replyWithHTML(`<b>Failed to withdraw. please report the problem.</b>`, MAIN_MENU)
                 }
@@ -203,7 +203,6 @@ class WithdrawHandler {
             }
             finally {
                 // unlock after everything is done
-                // ctx.session.lock = null ;
                 unlock();
                 ctx.deleteMessage()
                 ctx.scene.leave()
@@ -238,8 +237,14 @@ class WithdrawHandler {
             this.stepThree(),
             (ctx) => {
                 const {state} = ctx.scene.session;
+                let content = ''
+                if(state.destination_tag != 0 ){
+                    content = `<b>CONFIRM</b>\n\nYou want to withdraw <b>${state.amount} XRP</b> to <b>${state.address}</b> with Destanation Tag <b>${state.destination_tag}</b>\n\nis this correct?`
+                }else{
+                    content = `<b>CONFIRM</b>\n\nYou want to withdraw <b>${state.amount} XRP</b> to <b>${state.address}</b> \n\nis this correct?`
+                }
                 ctx.replyWithHTML(
-                    `<b>CONFIRM</b>\n\nYou want to withdraw <b>${state.amount} XRP</b> to <b>${state.address}</b> with Destanation Tag <b>${state.destination_tag}</b>\n\nis this correct?`,
+                    content,
                     Markup.inlineKeyboard([
                         Markup.callbackButton('Yes', 'confirm-withdraw-yes'),
                         Markup.callbackButton('No', 'confirm-withdraw-no')

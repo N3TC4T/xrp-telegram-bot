@@ -21,7 +21,9 @@ class BalanceHandler {
 
             const userModel = new this.db.User ;
             const user = await userModel.getUser(ctx);
-            replyWithHTML(`Your current balance:\n\n<code>${user.balance} $XRP</code>\n\nYou can use deposit command to add more $XRP to your balance`)
+            const marketModel = new this.db.Market;
+            const toUSD = await marketModel.calculate(user.balance, 'USD')
+            replyWithHTML(`Your current balance:\n\n<b>${user.balance} XRP</b> ~ (${toUSD} USD)\n\nYou can use deposit command to add more $XRP to your balance`)
         })
     }
 }

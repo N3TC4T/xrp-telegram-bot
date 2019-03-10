@@ -25,7 +25,7 @@ class MarketListener {
                 axios.get(
                     `${BASE_API}&convert=${p}`,
                     {
-                        timeout: 5000,
+                        timeout: 10000,
                         headers: {
                             'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY,
                         }
