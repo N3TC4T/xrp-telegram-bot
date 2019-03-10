@@ -41,7 +41,7 @@ module.exports = function (sequelize, DataTypes) {
 
     Feed.associate = function (models) {
         // associations can be defined here
-        Feed.belongsTo(models.Feed_Source, {
+        Feed.belongsTo(models.FeedSource, {
             targetKey: "id",
             foreignKey: "source"
         });

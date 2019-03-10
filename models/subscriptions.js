@@ -1,4 +1,5 @@
 'use strict';
+const feedSource = require('./feed_source')
 module.exports = function (sequelize, DataTypes) {
     const Subscriptions =  sequelize.define('Subscriptions', {
         source:{
@@ -41,8 +42,16 @@ module.exports = function (sequelize, DataTypes) {
     };
 
 
+    Subscriptions.prototype.getSettings =  function (chatId, source) {
+        return Subscriptions.findOne({
+            where: {chatId: chatId, source: source},
+        })
+        .then((u) => u ? u.get({plain: true}) : {active: false});
+    };
+
+
     Subscriptions.associate = function (models) {
-        Subscriptions.belongsTo(models.Feed_Source, {
+        Subscriptions.belongsTo(models.FeedSource, {
             targetKey: "id",
             foreignKey: "source"
         });

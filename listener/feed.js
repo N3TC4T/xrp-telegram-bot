@@ -37,7 +37,7 @@ class FeedListener {
                     ).catch(() => console.log(`Broadcast Failed for chat id ${s.chatId}`));
                     await this.sleep(1000);
                 }catch (e) {
-                    console.log(`Broadcast Feed Failed for chatId ${s.chatId}`)
+                    // console.log(`Broadcast Feed Failed for chatId ${s.chatId}`)
                 }
             });
         })

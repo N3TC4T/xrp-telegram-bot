@@ -22,7 +22,7 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: false,
         },
         result:{
-            type: DataTypes.STRING(),
+            type: DataTypes.JSON(),
             allowNull: false
         },
         datetime: {

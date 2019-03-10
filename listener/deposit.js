@@ -6,17 +6,20 @@ const chalk = require('chalk');
 const logger = require('../lib/loggin');
 
 // ripple-lib
-const RippleAPI = require('ripple-lib').RippleAPI;
+const RippledWsClient = require('rippled-ws-client')
 
 // constant
 const v = require("../config/vars");
+const _DEV_ = process.env.NODE_ENV === 'development';
 
 
 class DepositListener {
     constructor(bot, db) {
-        this.api = null;
         this.bot = bot;
         this.db = db;
+        this.wsURL = _DEV_ ? 'wss://s.altnet.rippletest.net:51233' : 'wss://s1.ripple.com:443' ;
+
+        this.onTransaction = this.onTransaction.bind(this)
         this.connect()
     }
 
@@ -24,10 +27,9 @@ class DepositListener {
     async onTransaction(ev){
 
         const { transaction } = ev;
-	logger.info(JSON.stringify(ev));
 
         if (process.env.WALLET_ADDRESS === transaction.Destination && transaction.DestinationTag) {
-            logger.info(`Deposit - ${JSON.stringify(transaction)}`);
+            logger.info(`Deposit - ${JSON.stringify(ev)}`);
 
 	    let amount = parseFloat(transaction.Amount) / 1000000;
             if (ev.meta && typeof ev.meta.delivered_amount !== 'undefined') {
@@ -54,51 +56,27 @@ class DepositListener {
             });
 
             this.bot.telegram.sendMessage(userID,
-                `<pre>Deposit Complete</pre>\nAmount: <code>${amount}</code> XRP\nFrom: <code> ${transaction.Account}</code>\n\nhttps://xrpcharts.ripple.com/#/transactions/${transaction.hash}`,
+                `<pre>Deposit Complete</pre>\n\nAmount: <code>${amount}</code> XRP\nFrom: <code> ${transaction.Account}</code>\n\nhttps://bithomp.com/explorer/${transaction.hash}`,
                 {parse_mode: 'HTML'}
             )
         }
     }
 
-    onConnect() {
-        console.log("---", chalk.green("Connected to Ripple Server [s3.ripple.com]"));
+    connect(){
+        new RippledWsClient(this.wsURL).then((Connection) => {
+            console.log("---", chalk.green(`Connected to Ripple server ${this.wsURL}`));
+          
+            Connection.send({
+              command: 'subscribe',
+              accounts: [ process.env.WALLET_ADDRESS ]
+            }).then((r) => {
+                console.log("---", chalk.green(`Subscribed to address ${process.env.WALLET_ADDRESS }`));
+            }).catch((e) => {
+              console.log('subscribe Catch', e)
+            })
 
-        // subscribe our wallet address
-        this.api.connection.request({
-            command: 'subscribe',
-            accounts: [process.env.WALLET_ADDRESS],
-        });
-
-
-        // Subscribe for new transactions
-        this.api.connection.on('transaction', ev => { this.onTransaction(ev) } )
-    };
-
-    onDisconnect(code) {
-        console.log("---", chalk.red("Disconnected from Ripple server"));
-    };
-
-    connect() {
-        if (this.api !== null) {
-            this.api.disconnect();
-        }
-
-        this.api = new RippleAPI({ server: "wss://s3.ripple.com:443" });
-
-        this.api.connect().then(() => {
-            this.onConnect();
-        });
-
-        this.api.on('disconnected', code => {
-            this.onDisconnect(code);
-        });
-    }
-
-    disconnect() {
-        if (this.api !== null) {
-            this.api.disconnect();
-        }
-        this.api = null;
+            Connection.on('transaction', this.onTransaction)
+        })
     }
 }
 

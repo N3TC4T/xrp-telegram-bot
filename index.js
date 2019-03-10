@@ -1,45 +1,38 @@
 require('dotenv').config();
 
+// Telegraf
 const Telegraf = require('telegraf');
+const Stage = require("telegraf/stage");
 const commandParts = require('telegraf-command-parts');
 const RedisSession = require('./lib/session');
-const DepositListener = require('./listener/deposit');
-const FeedListener = require('./listener/feed');
 
+// libs
 const chalk = require('chalk');
+const logger = require('./lib/loggin');
+const glob = require( 'glob' );
+const path = require( 'path' );
 
-const v = require(__dirname+'/config/vars');
+// constants
+const v = require(__dirname + '/config/vars');
 const db = require('./models/index');
 
-const logger = require('./lib/loggin');
-
+// defines
 const userModel = new db.User ;
 const groupModel = new db.Group ;
-const logModel = new db.Log;
+const _DEV_ = process.env.NODE_ENV === 'development';
 
 
-// init bot
-const bot = new Telegraf(process.env.BOT_TOKEN);
 
+/** Init bot */
+const bot = new Telegraf(_DEV_ ? process.env.BOT_TOKEN_DEVELOPMENT : process.env.BOT_TOKEN );
 // Set bot username
 bot.telegram.getMe().then((botInfo) => {
     bot.options.username = botInfo.username
 });
 
-console.log("Starting", chalk.magenta(v.BOT_NAME_HUMAN + " v" + v.BOT_VERSION));
+console.log("Starting", chalk.magenta(`${v.BOT_NAME_HUMAN} v${ v.BOT_VERSION} ${_DEV_? '[Development]': ''}`));
 console.log("---", chalk.cyan(new Date()));
 
-/** Command lists here */
-const commandList = [
-    require('./commands/start'),
-    require('./commands/help'),
-    require('./commands/send'),
-    require('./commands/deposit'),
-    require('./commands/balance'),
-    require('./commands/withdraw'),
-    require('./commands/subscribe'),
-    require('./commands/unsubscribe'),
-];
 
 /** Using REDIS Instead of JS Memory */
 const session = new RedisSession({
@@ -49,26 +42,57 @@ const session = new RedisSession({
     },
     getSessionKey: ctx => ctx.from.id
 });
-bot.use(session.middleware());
-bot.use(commandParts());
-
-/** Managing Middleware for records session or anything */
-bot.use((ctx, next) => userModel.updateUser(ctx, next));
-bot.use((ctx, next) => groupModel.updateGroup(ctx, next));
-bot.use((ctx, next) => logModel.toLog(ctx, next));
 
 
+/** Error handling */
 bot.catch((err) => {
     logger.error(err);
 });
 
-commandList.forEach((d) => {
-    new d(bot, db);
+
+
+/** Command lists here */
+const handlersList = [];
+glob.sync( './handlers/**/*.js' ).forEach( function( file ) {
+    handlersList.push(require( path.resolve( file ) ));
 });
 
-new DepositListener(bot,db);
-new FeedListener(bot,db);
 
+/** Define Wizards */
+const stage = new Stage();
+handlersList.forEach((d) => {
+    const h = new d(bot, db, stage);
+    if(typeof h.setWizard === 'function') {
+        h.setWizard()
+    }
+});
+
+
+/** Middleware */
+bot.use(session.middleware());
+bot.use(stage.middleware());
+bot.use(commandParts());
+bot.use((ctx, next) => userModel.updateUser(ctx, next));
+bot.use((ctx, next) => groupModel.updateGroup(ctx, next));
+
+
+/** set Handlers */
+handlersList.forEach((d) => {
+    const h = new d(bot, db, stage);
+    if(typeof h.setHandler === 'function') {
+        h.setHandler()
+    }
+});
+
+
+/** Jobs */
+glob.sync( './listener/**/*.js' ).forEach( function( file ) {
+    const l = require( path.resolve( file ) );
+    new l(bot,db)
+});
+
+
+/** Start the bot */
 bot.startPolling();
 
 

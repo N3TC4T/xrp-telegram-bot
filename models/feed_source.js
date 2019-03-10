@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('Feed_Source', {
+    return sequelize.define('FeedSource', {
         url:{
             type: DataTypes.STRING(),
             allowNull: false
