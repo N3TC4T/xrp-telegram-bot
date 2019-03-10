@@ -118,6 +118,13 @@ class WithdrawHandler {
                 if (parseFloat(user.balance) < parseFloat(amount)) {//Insufficient fund
                     return replyWithHTML(`<b>Insufficient Balance, Please enter a currect amount</b>`)
                 }
+
+                const components = amount.split('.')
+                const fraction = components[1] || '0'
+                console.log(fraction)
+                if (fraction.length > 6) {
+                    return replyWithHTML(`<b>Too many decimal places, should be less that 6</b>`)
+                }
             }
 
             //set withdraw amount
@@ -156,7 +163,7 @@ class WithdrawHandler {
 
                 const withdraw = {
                     source_tag: user.telegramId,
-                    amount: parseFloat(state.amount),
+                    amount: state.amount,
                     address: state.address,
                     destination_tag: state.destination_tag
                 }
