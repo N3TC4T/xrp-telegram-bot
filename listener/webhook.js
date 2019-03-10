@@ -63,7 +63,7 @@ class WebhookListener {
             res.sendStatus(200)
           })
           
-          app.listen(3000, () => console.log("---", chalk.green("Started Webhook Listener on port 3000")) )
+          app.listen(4000, () => console.log("---", chalk.green("Started Webhook Listener on port 4000")) )
     }
 
 }
