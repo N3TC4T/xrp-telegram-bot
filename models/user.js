@@ -31,69 +31,73 @@ module.exports = function(sequelize, DataTypes) {
     };
 
     User.prototype.updateUser = function (ctx, next) {
-        let from = null;
-        if (ctx.updateType === "callback_query") {
-            from = ctx.update.callback_query.from;
-        } else {
-            if(_.has(ctx, ['update', 'message', 'from'])){
-                from = ctx.update.message.from;
-            }
-        }
 
-        if(!from){
-            return next()
-        }
-
-        User.findOne({where: {telegramId: from.id}})
-            .then(async (u) => {
-                if (u) {
-                    if(!u.username && from.username){
-                        await User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
-                        .then(async (user) => {
-                            if(user){
-                                if(!user.telegramId){
-                                    await sequelize.query(`UPDATE Transactions SET to_user = ${u.id} WHERE to_user = ${user.id}`)
-    
-                                    await u.increment('balance', {by: user.get('balance')})
-                                    User.destroy({
-                                        where: {
-                                            id: user.id
-                                        }
-                                    })
-    
-                                    logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
-                                }
-                            }
-                          
-                        })
-                    }
-                    u.first_name = from.first_name;
-                    u.last_name = from.last_name;
-                    u.username = from.username;
-                    u.language = from.language_code;
-                    u.save();
-                } else {
-                    User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
-                        .then((u) => {
-                            if (u) {
-                                u.first_name = from.first_name;
-                                u.last_name = from.last_name;
-                                u.telegramId = from.id;
-                                u.language = from.language_code;
-                                u.save();
-                            } else {
-                                User.create({
-                                    telegramId: from.id,
-                                    first_name: from.first_name,
-                                    last_name: from.last_name,
-                                    username: from.username,
-                                    language: from.language_code
-                                })
-                            }
-                        })
+        try{
+            let from = null;
+            if (ctx.updateType === "callback_query") {
+                from = ctx.update.callback_query.from;
+            } else {
+                if(_.has(ctx, ['update', 'message', 'from'])){
+                    from = ctx.update.message.from;
                 }
-            });
+            }
 
+            if(!from){
+                return next()
+            }
+
+            User.findOne({where: {telegramId: from.id}})
+                .then(async (u) => {
+                    if (u) {
+                        if(!u.username && from.username){
+                            await User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
+                            .then(async (user) => {
+                                if(user){
+                                    if(!user.telegramId){
+                                        await sequelize.query(`UPDATE Transactions SET to_user = ${u.id} WHERE to_user = ${user.id}`)
+        
+                                        await u.increment('balance', {by: user.get('balance')})
+                                        User.destroy({
+                                            where: {
+                                                id: user.id
+                                            }
+                                        })
+        
+                                        logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
+                                    }
+                                }
+                            
+                            })
+                        }
+                        u.first_name = from.first_name;
+                        u.last_name = from.last_name;
+                        u.username = from.username;
+                        u.language = from.language_code;
+                        u.save().catch((e) => { console.log(`can not save user with id ${from.id}` + e)});
+                    } else {
+                        User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
+                            .then((u) => {
+                                if (u) {
+                                    u.first_name = from.first_name;
+                                    u.last_name = from.last_name;
+                                    u.telegramId = from.id;
+                                    u.language = from.language_code;
+                                    u.save().catch((e) => { console.log(`can not save user with id ${from.id}` + e)});
+                                } else {
+                                    User.create({
+                                        telegramId: from.id,
+                                        first_name: from.first_name,
+                                        last_name: from.last_name,
+                                        username: from.username,
+                                        language: from.language_code
+                                    }).catch((e) => { console.log(`can not create user with id ${from.id}` + e)});
+                                }
+                            })
+                    }
+                });
+        }catch(e){
+            console.log(`Can not update user ${from.id}` + e)
+        }
         return next()
     };
 

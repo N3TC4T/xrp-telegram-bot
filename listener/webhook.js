@@ -45,7 +45,7 @@ class WebhookListener {
                 this.bot.telegram.sendMessage(user.telegramId,
                     `<pre>🔔 Wallet Notify</pre>\n\nFrom: <code> ${transaction.Account}</code>\nTo: <code> ${transaction.Destination}</code>\nAmount: <code>${amount}</code> XRP\n\nYou can disable this messages in notificatons settings.\n\nhttps://bithomp.com/explorer/${transaction.hash}`,
                     {parse_mode: 'HTML'}
-                )
+                ).catch((e) => { console.log(`can not send wallet notify for user: ${user.telegramId}`)})
             });
 
          }catch(e) { console.log(e)}

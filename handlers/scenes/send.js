@@ -165,7 +165,7 @@ class SendHandler {
                     this.app.telegram.sendMessage(to_user.telegramId,
                         `<b>${state.amount}</b> XRP is received from @${from_user.username}\nYour new balance is <b>${recipient_balance} XRP</b>`,
                         {parse_mode: 'HTML'}
-                    )
+                    ).catch((e) => {console.log(`can not send notify message to reciver id ${to_user.telegramId}`)})
                 }
 
                 return replyWithHTML(
