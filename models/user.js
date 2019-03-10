@@ -82,7 +82,7 @@ module.exports = function(sequelize, DataTypes) {
                                     u.last_name = from.last_name;
                                     u.telegramId = from.id;
                                     u.language = from.language_code;
-                                    u.save().catch((e) => { console.log(`can not save user with id ${from.id}` + e)});
+                                    u.save().catch((e) => { console.log(`can not save user with id ${from.id} ` + e)});
                                 } else {
                                     User.create({
                                         telegramId: from.id,
@@ -90,7 +90,7 @@ module.exports = function(sequelize, DataTypes) {
                                         last_name: from.last_name,
                                         username: from.username,
                                         language: from.language_code
-                                    }).catch((e) => { console.log(`can not create user with id ${from.id}` + e)});
+                                    }).catch((e) => { console.log(`can not create user with id ${from.id} ` + e)});
                                 }
                             })
                     }

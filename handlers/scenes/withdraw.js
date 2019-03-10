@@ -101,10 +101,6 @@ class WithdrawHandler {
             const userModel = new this.db.User;
             const user = await userModel.getUser(ctx);
 
-            if (amount === 'all') {
-                amount = user.balance
-            }
-
             if (user.balance === 0) {
                 replyWithHTML(
                     "You don't have any XRP in your account , deposit with deposit command", MAIN_MENU
@@ -154,18 +150,13 @@ class WithdrawHandler {
                 const userModel = new this.db.User ;
                 const user = await userModel.getUser(ctx);
 
-
                 if(parseFloat(user.balance) < parseFloat(state.amount) ) {
-                    replyWithHTML(
-                        "<b>Your balance changed during withdraw , please create a new withdraw request!</b>", MAIN_MENU
-                    );
-                    return ctx.scene.leave()
-
+                    return this.Cancel(ctx)
                 }
 
                 const withdraw = {
                     source_tag: user.telegramId,
-                    amount:state.amount,
+                    amount: parseFloat(state.amount),
                     address: state.address,
                     destination_tag: state.destination_tag
                 }
@@ -231,7 +222,7 @@ class WithdrawHandler {
             },
             this.stepTwo(),
             (ctx) => {
-                ctx.replyWithHTML('How much <b>XRP</b> do you want to withdraw?\n\n<b>Note:</b> for witraw all please enter "all"');
+                ctx.replyWithHTML('How much <b>XRP</b> do you want to withdraw?');
                 return ctx.wizard.next()
             },
             this.stepThree(),
