@@ -50,18 +50,21 @@ module.exports = function(sequelize, DataTypes) {
                     if(!u.username && from.username){
                         await User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
                         .then(async (user) => {
-                            if(!user.telegramId){
-                                await sequelize.query(`UPDATE Transactions SET to_user = ${u.id} WHERE to_user = ${user.id}`)
-
-                                await u.increment('balance', {by: user.get('balance')})
-                                User.destroy({
-                                    where: {
-                                        id: user.id
-                                    }
-                                })
-
-                                logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
+                            if(user){
+                                if(!user.telegramId){
+                                    await sequelize.query(`UPDATE Transactions SET to_user = ${u.id} WHERE to_user = ${user.id}`)
+    
+                                    await u.increment('balance', {by: user.get('balance')})
+                                    User.destroy({
+                                        where: {
+                                            id: user.id
+                                        }
+                                    })
+    
+                                    logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
+                                }
                             }
+                          
                         })
                     }
                     u.first_name = from.first_name;
