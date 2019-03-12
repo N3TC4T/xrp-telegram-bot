@@ -100,9 +100,16 @@ class TipHandler {
                     const marketModel = new self.db.Market;
                     const toUSD = await marketModel.calculate(amount, 'USD')
 
-                    return replyWithHTML(
-                        `@${to_user.username} - 🎉 Woohoo, You have received a tip: <b>${amount} XRP</b> (${toUSD} USD) from @${from_user.username}`
-                    )
+                    if(toUSD == 0 ){
+                        return replyWithHTML(
+                            `@${to_user.username} - 🎉 Woohoo, You have received a tip: <b>${amount} XRP</b> from @${from_user.username}`
+                        )
+                    }else{
+                        return replyWithHTML(
+                            `@${to_user.username} - 🎉 Woohoo, You have received a tip: <b>${amount} XRP</b> (${toUSD} USD) from @${from_user.username}`
+                        )
+                    }
+                    
                 }
                 catch (err) {
                     logger.error(`Send Error - ${err}`);
