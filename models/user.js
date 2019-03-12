@@ -63,7 +63,7 @@ module.exports = function(sequelize, DataTypes) {
                                             }
                                         })
         
-                                        logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
+                                        logger.info(`Migrate  ${user.username} -> ${u.id} - +${user.balance}`);
                                     }
                                 }
                             })
