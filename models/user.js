@@ -49,7 +49,7 @@ module.exports = function(sequelize, DataTypes) {
             User.findOne({where: {telegramId: from.id}})
                 .then(async (u) => {
                     if (u) {
-                        if(!u.username && from.username){
+                        if(u.username !== from.username){
                             await User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
                             .then(async (user) => {
                                 if(user){
@@ -66,14 +66,13 @@ module.exports = function(sequelize, DataTypes) {
                                         logger.info(`Migrate  ${user.username} -> ${user.id} - +${user.balance}`);
                                     }
                                 }
-                            
                             })
                         }
                         u.first_name = from.first_name;
                         u.last_name = from.last_name;
                         u.username = from.username;
                         u.language = from.language_code;
-                        u.save().catch((e) => { console.log(`can not save user with id ${from.id}` + e)});
+                        u.save().catch((e) => { console.log(`can not save user with id ${from.id} ` + e)});
                     } else {
                         User.findOne({where: { $col: sequelize.where(sequelize.fn('lower', sequelize.col('username')), sequelize.fn('lower', from.username)) }})
                             .then((u) => {

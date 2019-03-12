@@ -18,11 +18,10 @@ class StartHandler {
                 const admins = await ctx.getChatAdministrators()
                 if( !admins || !admins.length ) return;
                 if(admins.some( adm => adm.user.id === ctx.from.id )){
-                    return replyWithHTML(`Welcome , The XRP Bot successfully started.\nYou can use /tip command to send tip to other members of group.\nfor view all commands please use /help command`)
+                    return replyWithHTML(`Welcome , The XRP Bot successfully started.\nYou can use /tip command to send tip to other members of group.\nfor view all commands please use /help command\n\n⚠️ it is strongly recommended that you don't add this bot as administrator for preventing conflicts with other bots.`)
                 }else{
                     return 
                 }
-
             }
 
             const {username} = ctx.from;
