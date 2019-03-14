@@ -14,7 +14,7 @@ class MarketListener {
 
     start(){
         const self = this;
-        schedule.scheduleJob('0 2 * * * *', function () {
+        schedule.scheduleJob('*/5 * * * *', function () {
             self.fetchPrice()
         });
     }
