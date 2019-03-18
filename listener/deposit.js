@@ -76,6 +76,22 @@ class DepositListener {
             })
 
             Connection.on('transaction', this.onTransaction)
+
+            Connection.on('error', (error) => {
+                logger.error(`EVENT=error: Error ${error}` )
+            })
+            Connection.on('state', (stateEvent) => {
+                console.info('EVENT=state: State is now', stateEvent)
+            })
+            Connection.on('retry', (retryEvent) => {
+                console.log('EVENT=retry: << Retry connect >>', retryEvent)
+            })
+            Connection.on('reconnect', (reconnectEvent) => {
+                console.log('EVENT=reconnect: << Reconnected >>', reconnectEvent)
+            })
+            Connection.on('close', (closeEvent) => {
+                console.log('EVENT=close: Connection closed', closeEvent)
+            })
         })
     }
 }

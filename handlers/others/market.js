@@ -32,7 +32,7 @@ class MarketHandler {
                 let symbole = m.pair === 'USD' ? '$' : '€'
                 rows.push(`XRP Market ${m.pair}\n`)
                 rows.push(`----------------------------\n`)
-                rows.push(`Price: ***${Math.round(ticker.price * 100) / 100} ${symbole}***\n`)
+                rows.push(`Price: ***${Math.round(ticker.price * 1000) / 1000} ${symbole}***\n`)
                 if(ticker.percent_change_24h > 0){
                     rows.push(`24H: ***${Math.round(ticker.percent_change_24h * 100) / 100} %***\n`)
                 }else{
