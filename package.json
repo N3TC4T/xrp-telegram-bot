@@ -32,7 +32,7 @@
         "rippled-ws-client": "^1.0.0",
         "rippled-ws-client-sign": "^0.2.0",
         "rss-parser": "^3.6.3",
-        "sequelize": "^4.43.0",
+        "sequelize": "^5.3.5",
         "sequelize-cli": "^5.4.0",
         "telegraf": "^3.27.1",
         "telegraf-command-parts": "^1.0.3",
