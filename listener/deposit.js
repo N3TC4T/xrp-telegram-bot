@@ -63,36 +63,40 @@ class DepositListener {
     }
 
     connect(){
-        new RippledWsClient(this.wsURL).then((Connection) => {
-            console.log("---", chalk.green(`Connected to Ripple server ${this.wsURL}`));
-          
-            Connection.send({
-              command: 'subscribe',
-              accounts: [ process.env.WALLET_ADDRESS ]
-            }).then((r) => {
-                console.log("---", chalk.green(`Subscribed to address ${process.env.WALLET_ADDRESS }`));
-            }).catch((e) => {
-              console.log('subscribe Catch', e)
+        try{
+            new RippledWsClient(this.wsURL).then((Connection) => {
+                console.log("---", chalk.green(`Connected to Ripple server ${this.wsURL}`));
+              
+                Connection.send({
+                  command: 'subscribe',
+                  accounts: [ process.env.WALLET_ADDRESS ]
+                }).then((r) => {
+                    console.log("---", chalk.green(`Subscribed to address ${process.env.WALLET_ADDRESS }`));
+                }).catch((e) => {
+                  console.log('subscribe Catch', e)
+                })
+    
+                Connection.on('transaction', this.onTransaction)
+    
+                Connection.on('error', (error) => {
+                    logger.error(`EVENT=error: Error ${error}` )
+                })
+                Connection.on('state', (stateEvent) => {
+                    console.info('EVENT=state: State is now', stateEvent)
+                })
+                Connection.on('retry', (retryEvent) => {
+                    console.log('EVENT=retry: << Retry connect >>', retryEvent)
+                })
+                Connection.on('reconnect', (reconnectEvent) => {
+                    console.log('EVENT=reconnect: << Reconnected >>', reconnectEvent)
+                })
+                Connection.on('close', (closeEvent) => {
+                    console.log('EVENT=close: Connection closed', closeEvent)
+                })
             })
-
-            Connection.on('transaction', this.onTransaction)
-
-            Connection.on('error', (error) => {
-                logger.error(`EVENT=error: Error ${error}` )
-            })
-            Connection.on('state', (stateEvent) => {
-                console.info('EVENT=state: State is now', stateEvent)
-            })
-            Connection.on('retry', (retryEvent) => {
-                console.log('EVENT=retry: << Retry connect >>', retryEvent)
-            })
-            Connection.on('reconnect', (reconnectEvent) => {
-                console.log('EVENT=reconnect: << Reconnected >>', reconnectEvent)
-            })
-            Connection.on('close', (closeEvent) => {
-                console.log('EVENT=close: Connection closed', closeEvent)
-            })
-        })
+        }catch(e) {
+            console.log(`RippledWsClient ERROR ${e}`)
+        }
     }
 }
 

@@ -93,7 +93,7 @@ glob.sync( './listener/**/*.js' ).forEach( function( file ) {
 
 
 /** Start the bot */
-bot.startPolling();
+bot.launch();
 
 
 

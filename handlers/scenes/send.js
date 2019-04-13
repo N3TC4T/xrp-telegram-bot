@@ -160,16 +160,24 @@ class SendHandler {
                     datetime
                 });
 
+                const marketModel = new this.db.Market;
+                const toUSD = await marketModel.calculate(state.amount, 'USD')
+                let usd = ''
+
+                if(toUSD !== 0 ){
+                    usd = `(${toUSD} USD)`
+                }
+
                 // send message to recipient if there is any telegram id
                 if (to_user.telegramId) {
                     this.app.telegram.sendMessage(to_user.telegramId,
-                        `<b>${state.amount}</b> XRP is received from @${from_user.username}\nYour new balance is <b>${recipient_balance} XRP</b>`,
+                        `️️️️️️️You received <b>${state.amount} XRP</b> ${usd} from @${from_user.username}\nYour new balance is <b>${recipient_balance} XRP</b>`,
                         {parse_mode: 'HTML'}
-                    ).catch((e) => {console.log(`can not send notify message to reciver id ${to_user.telegramId}`)})
+                    ).catch((e) => {})
                 }
 
                 return replyWithHTML(
-                    `✅ <b>${state.amount} XRP</b> Successfully sent to @${to_user.username}!`
+                    `✅ <b>${state.amount} XRP</b> ${usd} Successfully sent to @${to_user.username}!`
                 )
                 
 
