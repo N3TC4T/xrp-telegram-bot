@@ -4,7 +4,8 @@
     "description": "Send , Deposit , Withdraw ,Tip With $XRP in Telegram",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "prettier": "prettier --write `find . -name \"*.js\"`"
     },
     "keywords": [
         "telegram",
@@ -21,6 +22,7 @@
         "chalk": "^2.4.2",
         "dotenv": "^6.2.0",
         "express": "^4.16.4",
+        "glob": "^7.1.3",
         "lodash": "^4.17.11",
         "moment": "^2.24.0",
         "mysql2": "^1.6.5",
@@ -41,5 +43,15 @@
     },
     "resolutions": {
         "jsonschema": "1.2.2"
+    },
+    "devDependencies": {
+        "eslint": "^5.3.0",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-config-prettier": "^4.1.0",
+        "eslint-plugin-import": "^2.17.0",
+        "eslint-plugin-jsx-a11y": "^6.2.1",
+        "eslint-plugin-prettier": "^3.0.1",
+        "eslint-plugin-react": "^7.12.4",
+        "prettier": "^1.17.0"
     }
 }

@@ -1,9 +1,9 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
-    const Deposit =  sequelize.define('Deposit', {
-        from_address:{
+module.exports = function(sequelize, DataTypes) {
+    const Deposit = sequelize.define('Deposit', {
+        from_address: {
             type: DataTypes.STRING(),
-            allowNull: false
+            allowNull: false,
         },
         destination_tag: {
             type: DataTypes.BIGINT(255),
@@ -15,7 +15,7 @@ module.exports = function (sequelize, DataTypes) {
         },
         tx_hash: {
             type: DataTypes.STRING(),
-            allowNull: false
+            allowNull: false,
         },
         for_user: {
             type: DataTypes.INTEGER(),
@@ -23,19 +23,17 @@ module.exports = function (sequelize, DataTypes) {
         },
         datetime: {
             allowNull: false,
-            type: DataTypes.DATE
-        }
+            type: DataTypes.DATE,
+        },
     });
 
-
-    Deposit.associate = function (models) {
+    Deposit.associate = function(models) {
         // associations can be defined here
         Deposit.belongsTo(models.User, {
-            targetKey: "id",
-            foreignKey: "for_user"
+            targetKey: 'id',
+            foreignKey: 'for_user',
         });
     };
 
-
-    return Deposit
+    return Deposit;
 };

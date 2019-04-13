@@ -1,14 +1,14 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
+module.exports = function(sequelize, DataTypes) {
     return sequelize.define('FeedSource', {
-        url:{
+        url: {
             type: DataTypes.STRING(),
-            allowNull: false
+            allowNull: false,
         },
         active: {
             type: DataTypes.BOOLEAN(),
             allowNull: false,
-            default: true
+            default: true,
         },
     });
 };

@@ -1,4 +1,7 @@
-require("dotenv").config();
+require('dotenv').config();
+
+//libs
+const { Composer } = require('telegraf');
 
 // this is for groups
 
@@ -19,10 +22,13 @@ class HelpHandler {
     }
 
     setHandler() {
-        this.app.command('help', (ctx) => {
-            const {replyWithMarkdown} = ctx;
-            return replyWithMarkdown(helpMsg)
-        })
+        this.app.command(
+            'help',
+            Composer.groupChat(ctx => {
+                const { replyWithMarkdown } = ctx;
+                return replyWithMarkdown(helpMsg);
+            }),
+        );
     }
 }
 

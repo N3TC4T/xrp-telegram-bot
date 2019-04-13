@@ -1,13 +1,13 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
-    const Feed =  sequelize.define('Feed', {
+module.exports = function(sequelize, DataTypes) {
+    const Feed = sequelize.define('Feed', {
         title: {
             type: DataTypes.TEXT(),
             allowNull: false,
         },
-        published:{
+        published: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: false,
         },
         link: {
             type: DataTypes.TEXT(),
@@ -19,33 +19,31 @@ module.exports = function (sequelize, DataTypes) {
         },
         source: {
             type: DataTypes.INTEGER(),
-            allowNull: false
-        }
+            allowNull: false,
+        },
     });
 
-
-
-    Feed.prototype.createIfNotExist =  function (entry) {
+    Feed.prototype.createIfNotExist = function(entry) {
         return Feed.findOrCreate({
-            where:{
-                link: entry.link
+            where: {
+                link: entry.link,
             },
             defaults: {
                 title: entry.title,
                 published: entry.pubDate,
                 author: entry.creator,
-                source: 1
-            }
-        })
-    };
-
-    Feed.associate = function (models) {
-        // associations can be defined here
-        Feed.belongsTo(models.FeedSource, {
-            targetKey: "id",
-            foreignKey: "source"
+                source: 1,
+            },
         });
     };
 
-    return Feed
+    Feed.associate = function(models) {
+        // associations can be defined here
+        Feed.belongsTo(models.FeedSource, {
+            targetKey: 'id',
+            foreignKey: 'source',
+        });
+    };
+
+    return Feed;
 };

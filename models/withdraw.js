@@ -1,9 +1,9 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
-    const Withdraw =  sequelize.define('Withdraw', {
-        to_address:{
+module.exports = function(sequelize, DataTypes) {
+    const Withdraw = sequelize.define('Withdraw', {
+        to_address: {
             type: DataTypes.STRING(),
-            allowNull: false
+            allowNull: false,
         },
         destination_tag: {
             type: DataTypes.BIGINT(255),
@@ -15,31 +15,29 @@ module.exports = function (sequelize, DataTypes) {
         },
         tx_hash: {
             type: DataTypes.STRING(),
-            allowNull: false
+            allowNull: false,
         },
         for_user: {
             type: DataTypes.INTEGER(),
             allowNull: false,
         },
-        result:{
+        result: {
             type: DataTypes.JSON(),
-            allowNull: false
+            allowNull: false,
         },
         datetime: {
             allowNull: false,
-            type: DataTypes.DATE
-        }
+            type: DataTypes.DATE,
+        },
     });
 
-
-    Withdraw.associate = function (models) {
+    Withdraw.associate = function(models) {
         // associations can be defined here
         Withdraw.belongsTo(models.User, {
-            targetKey: "id",
-            foreignKey: "for_user"
+            targetKey: 'id',
+            foreignKey: 'for_user',
         });
     };
 
-
-    return Withdraw
+    return Withdraw;
 };

@@ -1,7 +1,6 @@
-require("dotenv").config();
+require('dotenv').config();
 
-const _ = require("lodash");
-
+const { Composer } = require('telegraf');
 
 class BalanceHandler {
     constructor(app, db) {
@@ -10,26 +9,31 @@ class BalanceHandler {
     }
 
     setHandler() {
-        this.app.hears('⚖️ Balance', async(ctx) => {
-            const {replyWithHTML} = ctx;
-            // can not run this command in groups
-            const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
+        this.app.hears(
+            '⚖️ Balance',
+            Composer.privateChat(async ctx => {
+                const { replyWithHTML } = ctx;
 
-            if(chat_type !== 'private'){
-                return replyWithHTML(`<b>This type of command is not available in ${chat_type}!</b>`)
-            }
+                const userModel = new this.db.User();
+                const user = await userModel.getUser(ctx);
+                const marketModel = new this.db.Market();
+                const toUSD = await marketModel.calculate(user.balance, 'USD');
 
-            const userModel = new this.db.User ;
-            const user = await userModel.getUser(ctx);
-            const marketModel = new this.db.Market;
-            const toUSD = await marketModel.calculate(user.balance, 'USD')
-
-            if(toUSD == 0){
-                replyWithHTML(`Your current balance:\n\n<b>${user.balance} XRP</b>\n\nYou can use deposit command to add more $XRP to your balance`)
-            }else{
-                replyWithHTML(`Your current balance:\n\n<b>${user.balance} XRP</b> ~ (${toUSD} USD)\n\nYou can use deposit command to add more $XRP to your balance`)
-            }
-        })
+                if (toUSD == 0) {
+                    replyWithHTML(
+                        `Your current balance:\n\n<b>${
+                            user.balance
+                        } XRP</b>\n\nYou can use deposit command to add more $XRP to your balance`,
+                    );
+                } else {
+                    replyWithHTML(
+                        `Your current balance:\n\n<b>${
+                            user.balance
+                        } XRP</b> ~ (${toUSD} USD)\n\nYou can use deposit command to add more $XRP to your balance`,
+                    );
+                }
+            }),
+        );
     }
 }
 

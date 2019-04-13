@@ -1,30 +1,30 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
-    const Market =  sequelize.define('Market', {
+module.exports = function(sequelize, DataTypes) {
+    const Market = sequelize.define('Market', {
         pair: {
             type: DataTypes.STRING(),
             allowNull: false,
         },
-        ticker:{
+        ticker: {
             type: DataTypes.JSON(),
-            allowNull: false
+            allowNull: false,
         },
         source: {
             type: DataTypes.STRING(),
             allowNull: false,
-        }
+        },
     });
 
-    Market.prototype.calculate =  function (amount, pair) {
+    Market.prototype.calculate = function(amount, pair) {
         return Market.findOne({
-            where:{
-                pair
-            }
-        }).then((m) => {
-            const ticker = JSON.parse(m.ticker)
-            return Math.round((amount * ticker.price) * 100) / 100
+            where: {
+                pair,
+            },
+        }).then(m => {
+            const ticker = JSON.parse(m.ticker);
+            return Math.round(amount * ticker.price * 100) / 100;
         });
     };
 
-    return Market
+    return Market;
 };

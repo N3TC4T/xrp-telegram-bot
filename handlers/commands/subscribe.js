@@ -1,8 +1,7 @@
-require("dotenv").config();
+require('dotenv').config();
 
-const _ = require("lodash");
-const { admin } = require('telegraf')
-
+const _ = require('lodash');
+const { admin, Composer } = require('telegraf');
 
 class SubscribeHandler {
     constructor(app, db) {
@@ -11,85 +10,97 @@ class SubscribeHandler {
     }
 
     setHandler() {
-        this.app.command('subscribe',admin(async(ctx) => {
-            const {replyWithMarkdown} = ctx;
-            let from = null;
-            let update = null;
+        this.app.command(
+            'subscribe',
+            Composer.groupChat(
+                admin(async ctx => {
+                    const { replyWithMarkdown } = ctx;
+                    let from = null;
+                    let update = null;
 
-            const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
+                    const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
 
-            if(chat_type !== 'private'){
-                let chat = null;
-                if (ctx.updateType === "callback_query") {
-                    chat = ctx.update.callback_query.message.chat
-                } else {
-                    if(_.has(ctx, ['update', 'message', 'chat'])){
-                        chat = ctx.update.message.chat
+                    if (chat_type !== 'private') {
+                        let chat = null;
+                        if (ctx.updateType === 'callback_query') {
+                            chat = ctx.update.callback_query.message.chat;
+                        } else {
+                            if (_.has(ctx, ['update', 'message', 'chat'])) {
+                                chat = ctx.update.message.chat;
+                            }
+                        }
+                        from = chat;
+                    } else {
+                        if (ctx.updateType === 'callback_query') {
+                            update = ctx.update.callback_query;
+                            from = update.from;
+                        } else {
+                            update = ctx.update;
+                            if (_.has(ctx, ['update', 'message', 'from'])) {
+                                from = ctx.update.message.from;
+                            }
+                        }
                     }
-                }
-                from = chat
-            }else{
-                if (ctx.updateType === "callback_query") {
-                    update = ctx.update.callback_query;
-                    from = update.from
-                } else {
-                    update = ctx.update;
-                    if(_.has(ctx, ['update', 'message', 'from'])){
-                        from = ctx.update.message.from;
+
+                    const subscriptionsModel = new this.db.Subscriptions();
+
+                    const result = await subscriptionsModel.setSettings(from.id, true);
+                    if (result) {
+                        replyWithMarkdown(
+                            `Successfully ***subscribe*** to XRP Community Blog.\nFor unsubscribe please use \/unsubscribe command`,
+                        );
+                    } else {
+                        replyWithMarkdown(
+                            `Already ***subscribed*** to XRP Community Blog!\nFor unsubscribe please use \/unsubscribe command`,
+                        );
                     }
-                }
-            }
+                }),
+            ),
+        );
 
-            const subscriptionsModel = new this.db.Subscriptions;
+        this.app.command(
+            'unsubscribe',
+            Composer.groupChat(
+                admin(async ctx => {
+                    const { replyWithMarkdown } = ctx;
+                    let from = null;
+                    let update = null;
 
-            const result = await subscriptionsModel.setSettings(from.id, true);
-            if(result){
-                replyWithMarkdown(`Successfully ***subscribe*** to XRP Community Blog.\nFor unsubscribe please use \/unsubscribe command`)
-            }else {
-                replyWithMarkdown(`Already ***subscribed*** to XRP Community Blog!\nFor unsubscribe please use \/unsubscribe command`)
-            }
+                    const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
 
-        }))
-
-        this.app.command('unsubscribe', admin(async(ctx) => {
-            const {replyWithMarkdown} = ctx;
-            let from = null;
-            let update = null;
-
-            const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
-
-            if(chat_type !== 'private'){
-                let chat = null;
-                if (ctx.updateType === "callback_query") {
-                    chat = ctx.update.callback_query.message.chat
-                } else {
-                    if(_.has(ctx, ['update', 'message', 'chat'])){
-                        chat = ctx.update.message.chat
+                    if (chat_type !== 'private') {
+                        let chat = null;
+                        if (ctx.updateType === 'callback_query') {
+                            chat = ctx.update.callback_query.message.chat;
+                        } else {
+                            if (_.has(ctx, ['update', 'message', 'chat'])) {
+                                chat = ctx.update.message.chat;
+                            }
+                        }
+                        from = chat;
+                    } else {
+                        if (ctx.updateType === 'callback_query') {
+                            update = ctx.update.callback_query;
+                            from = update.from;
+                        } else {
+                            update = ctx.update;
+                            if (_.has(ctx, ['update', 'message', 'from'])) {
+                                from = ctx.update.message.from;
+                            }
+                        }
                     }
-                }
-                from = chat
-            }else{
-                if (ctx.updateType === "callback_query") {
-                    update = ctx.update.callback_query;
-                    from = update.from
-                } else {
-                    update = ctx.update;
-                    if(_.has(ctx, ['update', 'message', 'from'])){
-                        from = ctx.update.message.from;
+
+                    const subscriptionsModel = new this.db.Subscriptions();
+
+                    const result = await subscriptionsModel.setSettings(from.id, false);
+                    if (result) {
+                        replyWithMarkdown(`Successfully ***unsubscribe*** from XRP Community Blog.`);
+                    } else {
+                        replyWithMarkdown(`Already ***unsubscribed*** from XRP Community Blog!`);
                     }
-                }
-            }
-
-            const subscriptionsModel = new this.db.Subscriptions;
-
-            const result = await subscriptionsModel.setSettings(from.id, false);
-            if (result){
-                replyWithMarkdown(`Successfully ***unsubscribe*** from XRP Community Blog.`)
-            }else{
-                replyWithMarkdown(`Already ***unsubscribed*** from XRP Community Blog!`)
-            }
-
-        }))
+                }),
+            ),
+        );
     }
 }
 

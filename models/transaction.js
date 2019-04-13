@@ -1,13 +1,13 @@
 'use strict';
-module.exports = function (sequelize, DataTypes) {
-    const Transaction =  sequelize.define('Transaction', {
+module.exports = function(sequelize, DataTypes) {
+    const Transaction = sequelize.define('Transaction', {
         amount: {
             type: DataTypes.DECIMAL(20, 6),
             allowNull: false,
         },
         type: {
-            type:   DataTypes.ENUM,
-            values: ['direct', 'tip']
+            type: DataTypes.ENUM,
+            values: ['direct', 'tip'],
         },
         sender_username: {
             type: DataTypes.STRING,
@@ -27,23 +27,21 @@ module.exports = function (sequelize, DataTypes) {
         },
         datetime: {
             allowNull: false,
-            type: DataTypes.DATE
-        }
+            type: DataTypes.DATE,
+        },
     });
 
-
-    Transaction.associate = function (models) {
+    Transaction.associate = function(models) {
         // associations can be defined here
         Transaction.belongsTo(models.User, {
-            targetKey: "id",
-            foreignKey: "from_user"
+            targetKey: 'id',
+            foreignKey: 'from_user',
         });
         Transaction.belongsTo(models.User, {
-            targetKey: "id",
-            foreignKey: "to_user"
-        })
+            targetKey: 'id',
+            foreignKey: 'to_user',
+        });
     };
 
-
-    return Transaction
+    return Transaction;
 };

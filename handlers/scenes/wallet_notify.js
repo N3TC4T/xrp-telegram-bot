@@ -1,26 +1,23 @@
-require("dotenv").config();
+require('dotenv').config();
 
 const Composer = require('telegraf/composer');
 const Markup = require('telegraf/markup');
 const WizardScene = require('telegraf/scenes/wizard');
 
 //utils
-const _ = require("lodash");
-const moment = require("moment");
+const _ = require('lodash');
 
 //libs
 const address_codec = require('ripple-address-codec');
 
-
 const CANCEL_TEXT = '🔙 Back';
-const MAIN_MENU =  Markup.keyboard([
-        ['➡️ Send $XRP', '📈 Market'],
-        ['⚖️ Balance', '⬇️ Deposit', '⬆️ Withdraw'],
-        ['🔔 Notificaiton', '👥 Contact']
-    ])
+const MAIN_MENU = Markup.keyboard([
+    ['➡️ Send $XRP', '📈 Market'],
+    ['⚖️ Balance', '⬇️ Deposit', '⬆️ Withdraw'],
+    ['🔔 Notificaiton', '👥 Contact'],
+])
     .resize()
-    .extra()
-
+    .extra();
 
 class WalletHandler {
     constructor(app, db, stage) {
@@ -30,179 +27,177 @@ class WalletHandler {
         this.stage = stage;
     }
 
-
-    Cancel (ctx) {
+    Cancel(ctx) {
         try {
-            const { replyWithHTML } = ctx ;
-            return replyWithHTML('ℹ️ Main Menu.', MAIN_MENU)
-        }catch (e) {
-            console.log(e)
+            const { replyWithHTML } = ctx;
+            return replyWithHTML('ℹ️ Main Menu.', MAIN_MENU);
+        } catch (e) {
+            console.log(e);
         }
     }
-    
-    Menu (ctx) {
-        ctx.replyWithHTML('Wallet Notify Settings', Markup
-        .keyboard([
-            ['➕ Add Wallet', '📇 Manage Wallets'],
-            [CANCEL_TEXT]
-        ])
-        .resize()
-        .extra()
-        )
-        ctx.deleteMessage().catch((e) => {})
-        ctx.scene.leave()
 
+    Menu(ctx) {
+        ctx.replyWithHTML(
+            'Wallet Notify Settings',
+            Markup.keyboard([['➕ Add Wallet', '📇 Manage Wallets'], [CANCEL_TEXT]])
+                .resize()
+                .extra(),
+        );
+        ctx.deleteMessage().catch(e => {});
+        ctx.scene.leave();
     }
 
-    addHandler(){
+    addHandler() {
         const addHandler = new Composer();
-        addHandler.hears(CANCEL_TEXT, this.Menu);
-        addHandler.on('message', async ctx => {
-            const message = ctx.update.message.text;
-            if (!address_codec.isValidAddress(message)) {
-                return ctx.reply('⚠️ Please enter a correct XRP address.');
-            }
-   
-            const userModel = new this.db.User ;
-            const user = await userModel.getUser(ctx);
+        addHandler.hears(CANCEL_TEXT, Composer.privateChat(this.Menu));
+        addHandler.on(
+            'message',
+            Composer.privateChat(async ctx => {
+                const message = ctx.update.message.text;
+                if (!address_codec.isValidAddress(message)) {
+                    return ctx.reply('⚠️ Please enter a correct XRP address.');
+                }
 
-            const walletNotifyModel = new this.db.WalletNotify
-            const status = await walletNotifyModel.activeNotify(user.id, message);
-            if(status){
-                await ctx.replyWithHTML(`✅ Wallet Address <b>${message}</b> successfully added.\nAfter this You will get notification on payment transactions on this wallet.`)
-            }else{
-                await ctx.replyWithHTML(`Wallet Address <b>${message}</b> is already in your notify list.`)
-            }
+                const userModel = new this.db.User();
+                const user = await userModel.getUser(ctx);
 
-            this.Menu(ctx)
-        } );
-        return addHandler
+                const walletNotifyModel = new this.db.WalletNotify();
+                const status = await walletNotifyModel.activeNotify(user.id, message);
+                if (status) {
+                    await ctx.replyWithHTML(
+                        `✅ Wallet Address <b>${message}</b> successfully added.\nAfter this You will get notification on payment transactions on this wallet.`,
+                    );
+                } else {
+                    await ctx.replyWithHTML(`Wallet Address <b>${message}</b> is already in your notify list.`);
+                }
+
+                this.Menu(ctx);
+            }),
+        );
+        return addHandler;
     }
 
-
-    listHandler(){
+    listHandler() {
         const listHandler = new Composer();
-        listHandler.hears(CANCEL_TEXT, this.Menu);
-        listHandler.on('message',  async ctx => {
-            const text = ctx.message.text;
-            if(text === '📇 Manage Wallets'){
-                const MENU = []
-                const userModel = new this.db.User;
-                const user = await userModel.getUser(ctx)
-                const wallets = await this.db.WalletNotify.findAll({where: {for_user: user.id, active: true} })
-                wallets.forEach((s) => {
-                    MENU.push([s.address])
-                })
-                MENU.push([CANCEL_TEXT])
-                return ctx.replyWithHTML(
-                    'Please choose a wallet address to delete:',
-                    Markup.keyboard(MENU)
-                        .resize()
-                        .extra()
+        listHandler.hears(CANCEL_TEXT, Composer.privateChat(this.Menu));
+        listHandler.on(
+            'message',
+            Composer.privateChat(async ctx => {
+                const text = ctx.message.text;
+                if (text === '📇 Manage Wallets') {
+                    const MENU = [];
+                    const userModel = new this.db.User();
+                    const user = await userModel.getUser(ctx);
+                    const wallets = await this.db.WalletNotify.findAll({
+                        where: { for_user: user.id, active: true },
+                    });
+                    wallets.forEach(s => {
+                        MENU.push([s.address]);
+                    });
+                    MENU.push([CANCEL_TEXT]);
+                    return ctx.replyWithHTML(
+                        'Please choose a wallet address to delete:',
+                        Markup.keyboard(MENU)
+                            .resize()
+                            .extra(),
+                    );
+                }
+
+                const userModel = new this.db.User();
+                const user = await userModel.getUser(ctx);
+                const wallet = await this.db.WalletNotify.findOne({
+                    where: { address: text, for_user: user.id },
+                });
+                if (!wallet) {
+                    return ctx.replyWithHTML('⚠️ Please select a wallet from list!');
+                }
+
+                //set wallet notify id
+                ctx.scene.session.state.id = wallet.id;
+
+                ctx.replyWithHTML(
+                    `Are you sure you want to delete wallet address : <b>${
+                        wallet.address
+                    }</b> ?\n\nYou will not get any notify on this address anymore.`,
+                    Markup.inlineKeyboard([
+                        Markup.callbackButton('Yes', 'confirm-delete-wallet-yes'),
+                        Markup.callbackButton('No', 'confirm-delete-wallet-no'),
+                    ]).extra(),
                 );
 
-            }
+                ctx.wizard.next();
+            }),
+        );
 
-            const userModel = new this.db.User;
-            const user = await userModel.getUser(ctx);      
-            const wallet = await this.db.WalletNotify.findOne({where: {address: text, for_user: user.id} })
-            if(!wallet){
-                return ctx.replyWithHTML("⚠️ Please select a wallet from list!")
-            }
-
-            //set wallet notify id
-            ctx.scene.session.state.id = wallet.id;
-
-            ctx.replyWithHTML(
-                `Are you sure you want to delete wallet address : <b>${wallet.address}</b> ?\n\nYou will not get any notify on this address anymore.`,
-                Markup.inlineKeyboard([
-                    Markup.callbackButton('Yes', 'confirm-delete-wallet-yes'),
-                    Markup.callbackButton('No', 'confirm-delete-wallet-no')
-                ]).extra()
-            );
-      
-            ctx.wizard.next()
-
-        })
-
-        return listHandler
+        return listHandler;
     }
 
-    deleteHandler(){
+    deleteHandler() {
         const deleteHandler = new Composer();
 
-        deleteHandler.hears(CANCEL_TEXT, this.Menu);
-        deleteHandler.action('confirm-delete-wallet-no', this.Menu)
+        deleteHandler.hears(CANCEL_TEXT, Composer.privateChat(this.Menu));
+        deleteHandler.action('confirm-delete-wallet-no', Composer.privateChat(this.Menu));
 
-        deleteHandler.action('confirm-delete-wallet-yes', (ctx) => {
-            const {state} = ctx.scene.session;
+        deleteHandler.action(
+            'confirm-delete-wallet-yes',
+            Composer.privateChat(ctx => {
+                const { state } = ctx.scene.session;
 
-            const walletNotifyModel = new this.db.WalletNotify;
-            walletNotifyModel.deactiveNotify(state.id)
-            ctx.replyWithHTML('✅ Wallet Successfully removed!')
-            this.Menu(ctx)
-        });
-        return deleteHandler
+                const walletNotifyModel = new this.db.WalletNotify();
+                walletNotifyModel.deactiveNotify(state.id);
+                ctx.replyWithHTML('✅ Wallet Successfully removed!');
+                this.Menu(ctx);
+            }),
+        );
+        return deleteHandler;
     }
 
-
-    backHandler(){
+    backHandler() {
         const handler = new Composer();
-        handler.hears(CANCEL_TEXT, this.Menu);
-        return handler  
+        handler.hears(CANCEL_TEXT, Composer.privateChat(this.Menu));
+        return handler;
     }
-    async setWizard(){
+    async setWizard() {
         // Wallet notify add wizard
-         this.stage.register(new WizardScene('wallet_notify_add',
-            (ctx) => {
-                ctx.replyWithHTML(
-                    'Please enter XRP wallet address you want to add :',
-                    Markup.keyboard([[CANCEL_TEXT]])
-                        .resize()
-                        .extra()
-                );
-                ctx.wizard.next()
-            },
-            this.addHandler()
-        ))
+        this.stage.register(
+            new WizardScene(
+                'wallet_notify_add',
+                ctx => {
+                    ctx.replyWithHTML(
+                        'Please enter XRP wallet address you want to add :',
+                        Markup.keyboard([[CANCEL_TEXT]])
+                            .resize()
+                            .extra(),
+                    );
+                    ctx.wizard.next();
+                },
+                this.addHandler(),
+            ),
+        );
         // Wallet notify delete wizard
-        this.stage.register(new WizardScene('wallet_notify_delete',
-            this.backHandler(),
-            this.listHandler(),
-            this.deleteHandler()
-        ))
+        this.stage.register(
+            new WizardScene('wallet_notify_delete', this.backHandler(), this.listHandler(), this.deleteHandler()),
+        );
     }
 
-    setHandler(){
-        this.app.hears(CANCEL_TEXT, this.Cancel);
-        this.app.hears('➕ Add Wallet', (ctx) => {
-            const {replyWithHTML, scene} = ctx;
-            // can not run this command in groups
-            const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
+    setHandler() {
+        this.app.hears(CANCEL_TEXT, Composer.privateChat(this.Cancel));
+        this.app.hears(
+            '➕ Add Wallet',
+            Composer.privateChat(ctx => {
+                const { scene } = ctx;
+                scene.enter('wallet_notify_add');
+            }),
+        );
 
-            if(chat_type !== 'private'){
-                return replyWithHTML(`<b>This type of command is not available in ${chat_type}!</b>`)
-            }
-
-            scene.enter('wallet_notify_add')
-
-        })
-
-        this.app.hears('📇 Manage Wallets', (ctx) => {
-            const {replyWithHTML, scene} = ctx;
-            // can not run this command in groups
-            const chat_type = _.get(ctx, ['update', 'message', 'chat', 'type']);
-
-            if(chat_type !== 'private'){
-                return replyWithHTML(`<b>This type of command is not available in ${chat_type}!</b>`)
-            }
-
-            scene.enter('wallet_notify_delete')
-
-        })
-
+        this.app.hears(
+            '📇 Manage Wallets',
+            Composer.privateChat(ctx => {
+                const { scene } = ctx;
+                scene.enter('wallet_notify_delete');
+            }),
+        );
     }
-
 }
 
 module.exports = WalletHandler;
