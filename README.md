@@ -1,4 +1,4 @@
-# Ripple Telegram bot
+# XRP Telegram bot
 
 Built With :
 
