@@ -8,6 +8,7 @@ const { Composer } = require('telegraf');
 const helpMsg = `Command reference:
 /start - Start bot
 /tip - Tip a user in XRP
+/airdrop - Airdrop some XRP to random group members
 /market - Market tickers/price
 /subscribe - Subscribe to XRP Community Blog
 /unsubscribe - Unsubscribe to XRP Community Blog

@@ -34,7 +34,7 @@ module.exports = function(sequelize, DataTypes) {
             }
         }
 
-        if (!chat) {
+        if (!chat || !user) {
             return;
         }
         const group = await sequelize.models.Group.findOne({ where: { groupId: chat.id } });
@@ -50,6 +50,9 @@ module.exports = function(sequelize, DataTypes) {
                 },
             });
         } else {
+            if (!from) {
+                return;
+            }
             if (left_chat_member.id !== from.id) {
                 // someone kicked the user
                 if (!from.is_bot) {
