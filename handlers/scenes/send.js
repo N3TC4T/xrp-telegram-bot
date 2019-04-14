@@ -54,12 +54,14 @@ class SendHandler {
                 const userModel = new this.db.User();
                 const from_user = await userModel.getUser(ctx);
 
-                if (!username || username.length < 5) {
+                if (!/[a-z0-9/_]{5,32}/.test(username)) {
                     return ctx.reply('⚠️ Please enter a valid telegram username. Ex: @n3tc4t');
                 }
 
-                if (from_user.username.toLowerCase() === username.toLowerCase()) {
-                    return ctx.reply(`️️️️⚠️ You can not send to yourself!`);
+                if (from_user.username) {
+                    if (from_user.username.toLowerCase() === username.toLowerCase()) {
+                        return ctx.reply(`️️️️⚠️ You can not send XRP to yourself!`);
+                    }
                 }
 
                 //set send username

@@ -1,6 +1,6 @@
 {
     "name": "XRP-Telegram-Bot",
-    "version": "1.0.0",
+    "version": "1.5.0",
     "description": "Send , Deposit , Withdraw ,Tip With $XRP in Telegram",
     "main": "index.js",
     "scripts": {

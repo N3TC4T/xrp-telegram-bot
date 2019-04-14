@@ -5,15 +5,12 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(module.filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = require(path.join(__dirname, '/../config/config.json'))[env];
 
 let db = {};
 let sequelize = null;
 
-sequelize = new Sequelize(config.database, config.username, config.password, {
-    ...config,
-    operatorsAliases: Sequelize.Op,
-});
+sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 fs.readdirSync(__dirname)
     .filter(function(file) {

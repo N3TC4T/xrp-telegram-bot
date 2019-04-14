@@ -29,14 +29,19 @@ module.exports = function(sequelize, DataTypes) {
         // associations can be defined here
     };
 
-    User.prototype.updateUser = function(ctx, next) {
+    User.prototype.updateUser = async function(ctx, next) {
         try {
             let from = null;
+            let chat = null;
             if (ctx.updateType === 'callback_query') {
                 from = ctx.update.callback_query.from;
+                chat = ctx.update.callback_query.message.chat;
             } else {
                 if (_.has(ctx, ['update', 'message', 'from'])) {
                     from = ctx.update.message.from;
+                }
+                if (_.has(ctx, ['update', 'message', 'chat'])) {
+                    chat = ctx.update.message.chat;
                 }
             }
 
@@ -44,7 +49,7 @@ module.exports = function(sequelize, DataTypes) {
                 return next();
             }
 
-            User.findOne({ where: { telegramId: from.id } }).then(async u => {
+            const user = await User.findOne({ where: { telegramId: from.id } }).then(async u => {
                 if (u) {
                     if (u.username !== from.username) {
                         await User.findOne({
@@ -77,7 +82,7 @@ module.exports = function(sequelize, DataTypes) {
                     u.last_name = from.last_name;
                     u.username = from.username;
                     u.language = from.language_code;
-                    u.save().catch(e => {
+                    return u.save().catch(e => {
                         console.log(`can not save user with id ${from.id} ` + e);
                     });
                 } else {
@@ -94,11 +99,11 @@ module.exports = function(sequelize, DataTypes) {
                             u.last_name = from.last_name;
                             u.telegramId = from.id;
                             u.language = from.language_code;
-                            u.save().catch(e => {
+                            return u.save().catch(e => {
                                 console.log(`can not save user with id ${from.id} ` + e);
                             });
                         } else {
-                            User.create({
+                            return User.create({
                                 telegramId: from.id,
                                 first_name: from.first_name,
                                 last_name: from.last_name,
@@ -111,8 +116,13 @@ module.exports = function(sequelize, DataTypes) {
                     });
                 }
             });
+
+            if (chat.type === 'group' || chat.type === 'supergroup') {
+                const UserGroup = new sequelize.models.UserGroup();
+                await UserGroup.handle(ctx, user);
+            }
         } catch (e) {
-            console.log(`Can not update user ${from.id}` + e);
+            console.log(`Can not update user` + e);
         }
         return next();
     };

@@ -8,8 +8,25 @@ module.exports = function(sequelize, DataTypes) {
         title: DataTypes.STRING,
     });
 
-    Group.associate = function(models) {
-        // associations can be defined here
+    Group.prototype.getGroup = function(ctx) {
+        let chat = null;
+        if (ctx.updateType === 'callback_query') {
+            chat = ctx.update.callback_query.message.chat;
+        } else {
+            if (_.has(ctx, ['update', 'message', 'chat'])) {
+                chat = ctx.update.message.chat;
+            }
+        }
+
+        return Group.findOne({
+            where: { groupId: chat.id },
+            include: [
+                {
+                    model: sequelize.models.UserGroup,
+                    include: [sequelize.models.User],
+                },
+            ],
+        }).then(g => (g ? g.get({ plain: true }) : {}));
     };
 
     Group.prototype.updateGroup = function(ctx, next) {
@@ -42,6 +59,13 @@ module.exports = function(sequelize, DataTypes) {
             }
         });
         return next();
+    };
+
+    Group.associate = function(models) {
+        // associations can be defined here
+        Group.hasMany(models.UserGroup, {
+            foreignKey: 'group',
+        });
     };
 
     return Group;

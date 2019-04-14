@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
         },
         type: {
             type: DataTypes.ENUM,
-            values: ['direct', 'tip'],
+            values: ['direct', 'tip', 'airdrop'],
         },
         sender_username: {
             type: DataTypes.STRING,

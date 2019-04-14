@@ -11,6 +11,9 @@ const logger = require('../../lib/loggin');
 // constants
 const v = require('../../config/vars');
 
+// some hard coded groups
+const EXCLUDE_GROUPS = [-286577446, -1001180991966, -1001232049586, -1001146345213];
+
 class TipHandler {
     constructor(app, db) {
         this.app = app;
@@ -19,13 +22,26 @@ class TipHandler {
 
     setHandler() {
         this.app.command(
-            ['tip'],
+            ['tip', 'xrp'],
             Composer.groupChat(async ctx => {
                 const { replyWithHTML } = ctx;
-
                 const args = ctx.state.command.splitArgs;
-
+                const { command } = ctx.state.command;
                 const self = this;
+
+                let chat = null;
+                if (ctx.updateType === 'callback_query') {
+                    chat = ctx.update.callback_query.message.chat;
+                } else {
+                    if (_.has(ctx, ['update', 'message', 'chat'])) {
+                        chat = ctx.update.message.chat;
+                    }
+                }
+
+                // exclude groups with certain ids
+                if (command === 'tip' && EXCLUDE_GROUPS.includes(chat.id)) {
+                    return;
+                }
 
                 // check stuff
                 if (args.length === 2) {
@@ -40,32 +56,32 @@ class TipHandler {
                         const from_user = await userModel.getUser(ctx);
 
                         if (!from_user) {
-                            return replyWithHTML(
-                                `${ctx.from.username} You need to login to the bot before sending tip to other users.`,
-                            );
+                            return replyWithHTML(`⚠️ You need to login to the bot before sending tip to other users.`);
                         }
 
                         if (from_user.balance === 0) {
                             return replyWithHTML(
-                                "You don't have any XRP in your account , please deposit some XRP first!",
+                                "⚠️ You don't have any XRP in your account , please deposit some XRP first!",
                             );
                         }
 
-                        if (!username || username.length < 5) {
-                            return replyWithHTML(`Invalid Username, please enter a valid telegram username!`);
+                        if (!/[a-z0-9/_]{5,32}/.test(username)) {
+                            return replyWithHTML(
+                                `️️️️️️️️️️️️️️️⚠️ Invalid Username, please enter a valid telegram username!`,
+                            );
                         }
 
                         if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                            return replyWithHTML(`Invalid Amount, please enter a valid tip amount!`);
+                            return replyWithHTML(`⚠️ Invalid Amount, please enter a valid tip amount!`);
                         } else {
                             //valid amount
                             if (parseFloat(amount) < 0.000001) {
-                                return replyWithHTML(`The minimum amount to tip is <b>0.000001</b> XRP!`);
+                                return replyWithHTML(`⚠️ The minimum amount to tip is <b>0.000001</b> XRP!`);
                             }
                             if (parseFloat(from_user.balance) < parseFloat(amount)) {
                                 //Insufficient fund
                                 return replyWithHTML(
-                                    `<b>Insufficient Balance</b>, Please deposit some $XRP before tiping!`,
+                                    `⚠️ <b>Insufficient Balance</b>, Please deposit some $XRP before tiping!`,
                                 );
                             }
                         }
