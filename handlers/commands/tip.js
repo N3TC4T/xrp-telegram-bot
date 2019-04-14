@@ -138,7 +138,7 @@ class TipHandler {
                             );
                         }
                     } catch (err) {
-                        logger.error(`Send Error - ${err}`);
+                        logger.error(`Tip Error - ${err}`);
                         return replyWithHTML(`<b>Something is wrong , please report the problem.</b>`);
                     } finally {
                         unlock();

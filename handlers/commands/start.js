@@ -22,7 +22,7 @@ class StartHandler {
                         `Welcome , The XRP Bot successfully started.\nYou can use /tip command to send tip to other members of group.\nfor view all commands please use /help command.\n`,
                     );
                 } else {
-                    return;
+                    return replyWithHTML(`Just admins can start the bot!`);
                 }
             }
 
