@@ -65,7 +65,7 @@ class TipHandler {
                             );
                         }
 
-                        if (!/[a-z0-9/_]{5,32}/.test(username)) {
+                        if (!/[a-zA-Z0-9/_]{5,32}/.test(username)) {
                             return replyWithHTML(
                                 `️️️️️️️️️️️️️️️⚠️ Invalid Username, please enter a valid telegram username!`,
                             );
