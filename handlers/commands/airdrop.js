@@ -89,7 +89,9 @@ class AirdropHandler {
                         if (userGroups.length < count) {
                             count = userGroups.length;
                         }
-                        const perUser = parseFloat(amount) / count;
+
+                        const perUser = Math.round((parseFloat(amount) / count) * Math.pow(10, 6)) / Math.pow(10, 6);
+
                         //valid amount
                         if (perUser < 0.000001) {
                             return replyWithHTML(
