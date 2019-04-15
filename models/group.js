@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 
+const { Op } = require('sequelize');
+
 module.exports = function(sequelize, DataTypes) {
     const Group = sequelize.define('Group', {
         groupId: DataTypes.BIGINT,
@@ -23,7 +25,16 @@ module.exports = function(sequelize, DataTypes) {
             include: [
                 {
                     model: sequelize.models.UserGroup,
-                    include: [sequelize.models.User],
+                    include: [
+                        {
+                            model: sequelize.models.User,
+                            where: {
+                                username: {
+                                    [Op.ne]: null,
+                                },
+                            },
+                        },
+                    ],
                 },
             ],
         }).then(g => (g ? g.get({ plain: true }) : {}));
