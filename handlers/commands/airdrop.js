@@ -133,7 +133,6 @@ class AirdropHandler {
 
                         let parts = [];
                         let index = 0;
-                        let promises = [];
 
                         parts[index] = `Airdrop 🚀\nAirdropping <b>${amount} XRP</b> to <b>${count}</b> lucky member\n`;
 
@@ -149,10 +148,8 @@ class AirdropHandler {
                         });
 
                         for (let i = 0; i < parts.length; i++) {
-                            promises.push(replyWithHTML(parts[i]));
+                            await replyWithHTML(parts[i]);
                         }
-
-                        return Promise.all(promises);
                     } catch (err) {
                         logger.error(`Airdrop Error - ${err}`);
                         return replyWithHTML(`<b>Something is wrong , please report the problem.</b>`);
