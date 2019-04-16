@@ -11,7 +11,7 @@ const logger = require('../../lib/loggin');
 // constants
 const v = require('../../config/vars');
 
-const MAX_MESSAGE_LEN = 4096;
+const MAX_MESSAGE_LEN = 4090;
 
 class AirdropHandler {
     constructor(app, db) {
@@ -138,7 +138,7 @@ class AirdropHandler {
 
                         luckyUsers.map(u => {
                             const { User } = u;
-                            let temp = (parts[index] += `\n${perUser} XRP to @${User.username}`);
+                            let temp = parts[index] + `\n${perUser} XRP to @${User.username}`;
                             if (temp.length < MAX_MESSAGE_LEN) {
                                 parts[index] = temp;
                             } else {
