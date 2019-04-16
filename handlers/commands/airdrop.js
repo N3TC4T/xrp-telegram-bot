@@ -152,7 +152,7 @@ class AirdropHandler {
                             promises.push(replyWithHTML(parts[i]));
                         }
 
-                        return Promise.all(a);
+                        return Promise.all(promises);
                     } catch (err) {
                         logger.error(`Airdrop Error - ${err}`);
                         return replyWithHTML(`<b>Something is wrong , please report the problem.</b>`);
