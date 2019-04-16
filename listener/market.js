@@ -9,12 +9,11 @@ class MarketListener {
         this.bot = bot;
         this.db = db;
         this.start();
-        this.fetchPrice();
     }
 
     start() {
         const self = this;
-        schedule.scheduleJob('*/5 * * * *', function() {
+        schedule.scheduleJob('*/30 * * * *', function() {
             self.fetchPrice();
         });
     }

@@ -11,6 +11,8 @@ const logger = require('../../lib/loggin');
 // constants
 const v = require('../../config/vars');
 
+const MAX_MESSAGE_LEN = 4096;
+
 class AirdropHandler {
     constructor(app, db) {
         this.app = app;
@@ -99,20 +101,19 @@ class AirdropHandler {
                             );
                         }
 
-                        const luckUsers = this.getRandom(userGroups, count);
+                        const luckyUsers = this.getRandom(userGroups, count);
 
                         logger.info(
                             `Airdrop - ${from_user.username}:${from_user.id} - ${amount} XRP to ${
-                                luckUsers.length
+                                luckyUsers.length
                             } lucky member`,
                         );
 
                         // change balances for sender
                         await userModel.decreaseBalance(from_user, amount);
-                        let content = `Airdrop 🚀\nAirdropping <b>${amount} XRP</b> to <b>${count}</b> member\n`;
 
                         await Promise.all(
-                            luckUsers.map(async u => {
+                            luckyUsers.map(async u => {
                                 const { User } = u;
                                 await userModel.increaseBalance(User, perUser);
                                 const datetime = moment().format(v.DATE_FORMAT);
@@ -127,14 +128,31 @@ class AirdropHandler {
                                     to_user: User.id,
                                     datetime,
                                 });
-
-                                content += `\n${perUser} XRP to @${User.username}`;
                             }),
                         );
 
-                        content += '\n\n🎉 Happy tipping';
+                        let parts = [];
+                        let index = 0;
+                        let promises = [];
 
-                        return replyWithHTML(content);
+                        parts[index] = `Airdrop 🚀\nAirdropping <b>${amount} XRP</b> to <b>${count}</b> lucky member\n`;
+
+                        luckyUsers.map(u => {
+                            const { User } = u;
+                            let temp = (parts[index] += `\n${perUser} XRP to @${User.username}`);
+                            if (temp.length < MAX_MESSAGE_LEN) {
+                                parts[index] = temp;
+                            } else {
+                                index += 1;
+                                parts[index] = `${perUser} XRP to @${User.username}`;
+                            }
+                        });
+
+                        for (let i = 0; i < parts.length; i++) {
+                            promises.push(replyWithHTML(parts[i]));
+                        }
+
+                        return Promise.all(a);
                     } catch (err) {
                         logger.error(`Airdrop Error - ${err}`);
                         return replyWithHTML(`<b>Something is wrong , please report the problem.</b>`);
