@@ -44,7 +44,7 @@ module.exports = function(sequelize, DataTypes) {
             }
 
             if (!left_chat_member) {
-                UserGroup.findOrCreate({
+                await UserGroup.findOrCreate({
                     where: {
                         group: group.id,
                         user: user.id,
@@ -57,7 +57,7 @@ module.exports = function(sequelize, DataTypes) {
                 if (left_chat_member.id !== from.id) {
                     // someone kicked the user
                     if (!from.is_bot) {
-                        UserGroup.findOrCreate({
+                        await UserGroup.findOrCreate({
                             where: {
                                 group: group.id,
                                 user: user.id,
@@ -71,7 +71,7 @@ module.exports = function(sequelize, DataTypes) {
                         });
 
                         if (left_user) {
-                            UserGroup.destroy({
+                            await UserGroup.destroy({
                                 where: {
                                     group: group.id,
                                     user: left_user.id,
@@ -82,7 +82,7 @@ module.exports = function(sequelize, DataTypes) {
                 } else {
                     // user left by itself
                     if (!left_chat_member.is_bot) {
-                        UserGroup.destroy({
+                        await UserGroup.destroy({
                             where: {
                                 group: group.id,
                                 user: user.id,
