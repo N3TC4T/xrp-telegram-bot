@@ -22,3 +22,7 @@ $ npm i
 $ sequelize db:migrate
 $ node index
 ```
+
+## Screenshot
+ <img src="https://user-images.githubusercontent.com/6250203/65838132-43e38480-e300-11e9-952d-c11d36218f12.jpg"  height="400">
+
