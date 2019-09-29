@@ -17,6 +17,10 @@ const logger = require('../../lib/loggin');
 const v = require('../../config/vars');
 
 const CANCEL_TEXT = 'Back 🔙';
+const CANCEL_MENU = Markup.keyboard([[CANCEL_TEXT]])
+    .resize()
+    .extra();
+
 const MAIN_MENU = Markup.keyboard([
     ['➡️ Send $XRP', '📈 Market'],
     ['⚖️ Balance', '⬇️ Deposit', '⬆️ Withdraw'],
@@ -52,7 +56,14 @@ class WithdrawHandler {
             Composer.privateChat(ctx => {
                 const message = ctx.update.message.text;
                 if (!address_codec.isValidAddress(message)) {
-                    return ctx.reply('⚠️ Please enter a correct XRP address.');
+                    return ctx.replyWithHTML('⚠️ Please enter a correct XRP address.', CANCEL_MENU);
+                }
+
+                if (message === process.env.WALLET_ADDRESS) {
+                    return ctx.replyWithHTML(
+                        '⚠️ This address cannot be used, please enter another address.',
+                        CANCEL_MENU,
+                    );
                 }
 
                 // set withdraw address
@@ -86,7 +97,7 @@ class WithdrawHandler {
                     ctx.wizard.next();
                     return ctx.wizard.steps[ctx.wizard.cursor](ctx);
                 }
-                return ctx.reply('⚠️ Please enter a correct destination tag.');
+                return ctx.replyWithHTML('⚠️ Please enter a correct destination tag.', CANCEL_MENU);
             }),
         );
 
@@ -112,22 +123,25 @@ class WithdrawHandler {
                 }
 
                 if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                    return replyWithHTML(`<b>Invalid Amount, Please enter currect amout</b>`);
+                    return replyWithHTML(`<b>Invalid Amount, Please enter currect amout</b>`, CANCEL_MENU);
                 }
                 // valid amount
                 if (parseFloat(amount) < 0.1) {
-                    return replyWithHTML(`<b>The minimum amount to withdraw is 0.1 XRP, Please enter more</b>`);
+                    return replyWithHTML(
+                        `<b>The minimum amount to withdraw is 0.1 XRP, Please enter more</b>`,
+                        CANCEL_MENU,
+                    );
                 }
                 if (parseFloat(user.balance) < parseFloat(amount)) {
                     // Insufficient fund
-                    return replyWithHTML(`<b>Insufficient Balance, Please enter a currect amount</b>`);
+                    return replyWithHTML(`<b>Insufficient Balance, Please enter a currect amount</b>`, CANCEL_MENU);
                 }
 
                 const components = amount.split('.');
                 const fraction = components[1] || '0';
 
                 if (fraction.length > 6) {
-                    return replyWithHTML(`<b>Too many decimal places, should be less that 6</b>`);
+                    return replyWithHTML(`<b>Too many decimal places, should be less that 6</b>`, CANCEL_MENU);
                 }
 
                 // set withdraw amount
@@ -225,9 +239,7 @@ class WithdrawHandler {
                 ctx => {
                     ctx.replyWithHTML(
                         'Welcome to the withdrawal process of XRP Bot\n\nPlease respond to us with a valid <b>XRP</b> withdrawal address.',
-                        Markup.keyboard([[CANCEL_TEXT]])
-                            .resize()
-                            .extra(),
+                        CANCEL_MENU,
                     );
                     return ctx.wizard.next();
                 },
@@ -235,12 +247,13 @@ class WithdrawHandler {
                 ctx => {
                     ctx.replyWithHTML(
                         'Please enter <b>Destination Tag</b> for this withdrawal address:\n\nNote: For pass please enter enter "0"',
+                        CANCEL_MENU,
                     );
                     return ctx.wizard.next();
                 },
                 this.stepTwo(),
                 ctx => {
-                    ctx.replyWithHTML('How much <b>XRP</b> do you want to withdraw?');
+                    ctx.replyWithHTML('How much <b>XRP</b> do you want to withdraw?', CANCEL_MENU);
                     return ctx.wizard.next();
                 },
                 this.stepThree(),

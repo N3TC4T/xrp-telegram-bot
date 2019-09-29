@@ -41,6 +41,11 @@ class AirdropHandler {
                     return;
                 }
 
+                const admins = await ctx.getChatAdministrators();
+                if (!admins.some(adm => adm.user.id === ctx.from.id)) {
+                    return replyWithHTML(`⚠️  Just admins can run Airdrops!`);
+                }
+
                 // check stuff
                 if (args.length === 2) {
                     const unlock = await ctx.session.lock();

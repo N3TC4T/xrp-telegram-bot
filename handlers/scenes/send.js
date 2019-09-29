@@ -15,6 +15,9 @@ const logger = require('../../lib/loggin');
 const v = require('../../config/vars');
 
 const CANCEL_TEXT = 'Back 🔙';
+const CANCEL_MENU = Markup.keyboard([[CANCEL_TEXT]])
+    .resize()
+    .extra();
 const MAIN_MENU = Markup.keyboard([
     ['➡️ Send $XRP', '📈 Market'],
     ['⚖️ Balance', '⬇️ Deposit', '⬆️ Withdraw'],
@@ -54,13 +57,13 @@ class SendHandler {
                 const userModel = new this.db.User();
                 const from_user = await userModel.getUser(ctx);
 
-                if (!/[a-z0-9/_]{5,32}/.test(username)) {
-                    return ctx.reply('⚠️ Please enter a valid telegram username. Ex: @n3tc4t');
+                if (!/[a-zA-Z0-9/_]{5,32}/.test(username)) {
+                    return ctx.replyWithHTML('⚠️ Please enter a valid telegram username. Ex: @n3tc4t', CANCEL_MENU);
                 }
 
                 if (from_user.username) {
                     if (from_user.username.toLowerCase() === username.toLowerCase()) {
-                        return ctx.reply(`️️️️⚠️ You can not send XRP to yourself!`);
+                        return ctx.replyWithHTML(`️️️️⚠️ You can not send XRP to yourself!`, CANCEL_MENU);
                     }
                 }
 
@@ -97,15 +100,15 @@ class SendHandler {
                 }
 
                 if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                    return replyWithHTML(`<b>Invalid Amount</b>`);
+                    return replyWithHTML(`<b>Invalid Amount, please enter number.</b>`, CANCEL_MENU);
                 } else {
                     //valid amount
                     if (parseFloat(amount) < 0.000001) {
-                        return replyWithHTML(`<b>The minimum amount to send is 0.000001 XRP!</b>`);
+                        return replyWithHTML(`<b>The minimum amount to send is 0.000001 XRP!</b>`, CANCEL_MENU);
                     }
                     if (parseFloat(user.balance) < parseFloat(amount)) {
                         //Insufficient fund
-                        return replyWithHTML(`<b>Insufficient Balance</b>`);
+                        return replyWithHTML(`<b>Insufficient Balance</b>`, CANCEL_MENU);
                     }
                 }
 
@@ -208,17 +211,12 @@ class SendHandler {
             new WizardScene(
                 'send',
                 ctx => {
-                    ctx.replyWithHTML(
-                        'Please respond to us with a valid telegram <b>username</b>',
-                        Markup.keyboard([[CANCEL_TEXT]])
-                            .resize()
-                            .extra(),
-                    );
+                    ctx.replyWithHTML('Please respond to us with a valid telegram <b>username</b>', CANCEL_MENU);
                     return ctx.wizard.next();
                 },
                 this.stepOne(),
                 ctx => {
-                    ctx.reply('How much XRP do you want to send?');
+                    ctx.replyWithHTML('How much XRP do you want to send?', CANCEL_MENU);
                     return ctx.wizard.next();
                 },
                 this.stepTwo(),
