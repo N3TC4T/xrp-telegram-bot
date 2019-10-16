@@ -65,14 +65,14 @@ class TipHandler {
                             );
                         }
 
-                        if (!/[a-zA-Z0-9/_]{5,32}/.test(username)) {
+                        if (!/^[a-zA-Z0-9_-]{5,32}$/.test(username)) {
                             return replyWithHTML(
                                 `️️️️️️️️️️️️️️️⚠️ Invalid Username, please enter a valid telegram username!`,
                             );
                         }
 
                         if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                            return replyWithHTML(`⚠️ Invalid Amount, please enter a valid tip amount!`);
+                            return replyWithHTML(`⚠️ Invalid Amount, please enter a valid tip amount (just number)!`);
                         } else {
                             //valid amount
                             if (parseFloat(amount) < 0.000001) {

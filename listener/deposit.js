@@ -16,7 +16,7 @@ class DepositListener {
     constructor(bot, db) {
         this.bot = bot;
         this.db = db;
-        this.wsURL = _DEV_ ? 'wss://s.altnet.rippletest.net:51233' : 'wss://s1.ripple.com:443';
+        this.wsURL = _DEV_ ? 'wss://s.altnet.rippletest.net:51233' : 'wss://rippled.xrptipbot.com:443';
 
         this.onTransaction = this.onTransaction.bind(this);
         this.connect();
@@ -64,38 +64,42 @@ class DepositListener {
 
     connect() {
         try {
-            new RippledWsClient(this.wsURL).then(Connection => {
-                console.log('---', chalk.green(`Connected to Ripple server ${this.wsURL}`));
+            new RippledWsClient(this.wsURL)
+                .then(Connection => {
+                    console.log('---', chalk.green(`Connected to Ripple server ${this.wsURL}`));
 
-                Connection.send({
-                    command: 'subscribe',
-                    accounts: [process.env.WALLET_ADDRESS],
-                })
-                    .then(r => {
-                        console.log('---', chalk.green(`Subscribed to address ${process.env.WALLET_ADDRESS}`));
+                    Connection.send({
+                        command: 'subscribe',
+                        accounts: [process.env.WALLET_ADDRESS],
                     })
-                    .catch(e => {
-                        console.log('subscribe Catch', e);
+                        .then(r => {
+                            console.log('---', chalk.green(`Subscribed to address ${process.env.WALLET_ADDRESS}`));
+                        })
+                        .catch(e => {
+                            console.log('subscribe Catch', e);
+                        });
+
+                    Connection.on('transaction', this.onTransaction);
+
+                    Connection.on('error', error => {
+                        logger.error(`EVENT=error: Error ${error}`);
                     });
-
-                Connection.on('transaction', this.onTransaction);
-
-                Connection.on('error', error => {
-                    logger.error(`EVENT=error: Error ${error}`);
+                    Connection.on('state', stateEvent => {
+                        console.info('EVENT=state: State is now', stateEvent);
+                    });
+                    Connection.on('retry', retryEvent => {
+                        console.log('EVENT=retry: << Retry connect >>', retryEvent);
+                    });
+                    Connection.on('reconnect', reconnectEvent => {
+                        console.log('EVENT=reconnect: << Reconnected >>', reconnectEvent);
+                    });
+                    Connection.on('close', closeEvent => {
+                        console.log('EVENT=close: Connection closed', closeEvent);
+                    });
+                })
+                .catch(() => {
+                    console.log(`RippledWsClient ERROR ${e}`);
                 });
-                Connection.on('state', stateEvent => {
-                    console.info('EVENT=state: State is now', stateEvent);
-                });
-                Connection.on('retry', retryEvent => {
-                    console.log('EVENT=retry: << Retry connect >>', retryEvent);
-                });
-                Connection.on('reconnect', reconnectEvent => {
-                    console.log('EVENT=reconnect: << Reconnected >>', reconnectEvent);
-                });
-                Connection.on('close', closeEvent => {
-                    console.log('EVENT=close: Connection closed', closeEvent);
-                });
-            });
         } catch (e) {
             console.log(`RippledWsClient ERROR ${e}`);
         }

@@ -57,7 +57,7 @@ class SendHandler {
                 const userModel = new this.db.User();
                 const from_user = await userModel.getUser(ctx);
 
-                if (!/[a-zA-Z0-9/_]{5,32}/.test(username)) {
+                if (!/^[a-zA-Z0-9_-]{5,32}$/.test(username)) {
                     return ctx.replyWithHTML('⚠️ Please enter a valid telegram username. Ex: @n3tc4t', CANCEL_MENU);
                 }
 
@@ -96,11 +96,11 @@ class SendHandler {
                 }
 
                 if (user.balance === 0) {
-                    return replyWithHTML("You don't have any XRP in your account , deposit with /deposit command");
+                    return replyWithHTML("You don't have any XRP in your account , deposit some XRP first!");
                 }
 
                 if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                    return replyWithHTML(`<b>Invalid Amount, please enter number.</b>`, CANCEL_MENU);
+                    return replyWithHTML(`<b>Invalid Amount, please enter just numbers.</b>`, CANCEL_MENU);
                 } else {
                     //valid amount
                     if (parseFloat(amount) < 0.000001) {

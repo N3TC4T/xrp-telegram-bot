@@ -118,17 +118,20 @@ class WithdrawHandler {
                 const user = await userModel.getUser(ctx);
 
                 if (user.balance === 0) {
-                    replyWithHTML("You don't have any XRP in your account , deposit with deposit command", MAIN_MENU);
+                    replyWithHTML("You don't have any XRP in your account , deposit some XRP first!", MAIN_MENU);
                     return ctx.scene.leave();
                 }
 
                 if (!/^[+-]?\d+(\.\d+)?$/.test(amount)) {
-                    return replyWithHTML(`<b>Invalid Amount, Please enter currect amout</b>`, CANCEL_MENU);
+                    return replyWithHTML(
+                        `<b>Invalid Amount, Please enter currect amount (just number)</b>`,
+                        CANCEL_MENU,
+                    );
                 }
                 // valid amount
                 if (parseFloat(amount) < 0.1) {
                     return replyWithHTML(
-                        `<b>The minimum amount to withdraw is 0.1 XRP, Please enter more</b>`,
+                        `<b>The minimum amount to withdraw is <b>0.1 XRP</b>, Please enter more and try again.</b>`,
                         CANCEL_MENU,
                     );
                 }
@@ -141,7 +144,7 @@ class WithdrawHandler {
                 const fraction = components[1] || '0';
 
                 if (fraction.length > 6) {
-                    return replyWithHTML(`<b>Too many decimal places, should be less that 6</b>`, CANCEL_MENU);
+                    return replyWithHTML(`<b>Too many decimal places!</b>`, CANCEL_MENU);
                 }
 
                 // set withdraw amount
@@ -214,6 +217,11 @@ class WithdrawHandler {
                             }`,
                             MAIN_MENU,
                         );
+                    } else if (result && result.resultCode === 'error') {
+                        replyWithHTML(
+                            `<b>Failed to withdraw!\n\n${result.error.error.engine_result_message}</b>`,
+                            MAIN_MENU,
+                        );
                     } else {
                         replyWithHTML(`<b>Failed to withdraw. please report the problem.</b>`, MAIN_MENU);
                     }
@@ -246,7 +254,7 @@ class WithdrawHandler {
                 this.stepOne(),
                 ctx => {
                     ctx.replyWithHTML(
-                        'Please enter <b>Destination Tag</b> for this withdrawal address:\n\nNote: For pass please enter enter "0"',
+                        'Please enter <b>Destination Tag</b> for this withdrawal address:\n\nNote: For pass/ignore please enter "0"',
                         CANCEL_MENU,
                     );
                     return ctx.wizard.next();

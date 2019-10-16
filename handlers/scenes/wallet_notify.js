@@ -164,7 +164,7 @@ class WalletHandler {
                 'wallet_notify_add',
                 ctx => {
                     ctx.replyWithHTML(
-                        'Please enter XRP wallet address you want to add :',
+                        "Please enter XRP wallet address you want to add :\n\n⚠️ Do not enter address's that belongs to <b>Exchanges</b>",
                         Markup.keyboard([[CANCEL_TEXT]])
                             .resize()
                             .extra(),
