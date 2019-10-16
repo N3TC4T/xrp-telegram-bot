@@ -28,7 +28,7 @@
         "mysql2": "^1.6.5",
         "node-schedule": "^1.3.2",
         "redis": "^2.8.0",
-        "ripple-address-codec": "^4.0.0",
+        "ripple-address-codec": "^2.0.1",
         "rippled-ws-client": "^1.0.0",
         "rippled-ws-client-sign": "^0.2.0",
         "rss-parser": "^3.6.3",
