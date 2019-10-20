@@ -131,7 +131,7 @@ class WithdrawHandler {
                 // valid amount
                 if (parseFloat(amount) < 0.1) {
                     return replyWithHTML(
-                        `<b>The minimum amount to withdraw is <b>0.1 XRP</b>, Please enter more and try again.</b>`,
+                        `<b>The minimum amount to withdraw is 0.1 XRP, Please enter more and try again.</b>`,
                         CANCEL_MENU,
                     );
                 }
