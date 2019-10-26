@@ -11,6 +11,10 @@ const _ = require('lodash');
 const address_codec = require('ripple-address-codec');
 
 const CANCEL_TEXT = '🔙 Back';
+const CANCEL_MENU = Markup.keyboard([[CANCEL_TEXT]])
+    .resize()
+    .extra();
+
 const MAIN_MENU = Markup.keyboard([
     ['➡️ Send $XRP', '📈 Market'],
     ['⚖️ Balance', '⬇️ Deposit', '⬆️ Withdraw'],
@@ -109,7 +113,7 @@ class WalletHandler {
                     where: { address: text, for_user: user.id },
                 });
                 if (!wallet) {
-                    return ctx.replyWithHTML('⚠️ Please select a wallet from list!');
+                    return ctx.replyWithHTML('⚠️ Please select a wallet from list!', CANCEL_MENU);
                 }
 
                 //set wallet notify id
@@ -165,9 +169,7 @@ class WalletHandler {
                 ctx => {
                     ctx.replyWithHTML(
                         "Please enter XRP wallet address you want to add :\n\n⚠️ Do not enter address's that belongs to <b>Exchanges</b>",
-                        Markup.keyboard([[CANCEL_TEXT]])
-                            .resize()
-                            .extra(),
+                        CANCEL_MENU,
                     );
                     ctx.wizard.next();
                 },
