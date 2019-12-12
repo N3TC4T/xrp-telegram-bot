@@ -142,6 +142,11 @@ class SendHandler {
 
                     const from_user = await userModel.getUser(ctx);
                     const to_user = await userModel.getUserByUsername(state.username);
+                    
+                     if (parseFloat(from_user.balance) < parseFloat(state.amount)) {
+                        return this.Cancel(ctx);
+                     }
+
 
                     logger.info(
                         `Send - ${from_user.username}:${from_user.id} -> ${to_user.username}:${to_user.id} - ${
